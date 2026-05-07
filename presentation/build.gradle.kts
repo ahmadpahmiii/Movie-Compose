@@ -7,18 +7,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.movie"
+    namespace = "com.example.presentation"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.movie"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -55,13 +52,6 @@ android {
 }
 
 dependencies {
-  /*  implementation(project(":core:common"))
-    implementation(project(":core:network"))
-    implementation(project(":data"))
-    implementation(project(":domain"))
-    implementation(project(":presentation"))
-    implementation(project(":di"))*/
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
