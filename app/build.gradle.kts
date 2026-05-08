@@ -55,18 +55,18 @@ android {
 }
 
 dependencies {
-  /*  implementation(project(":core:common"))
-    implementation(project(":core:network"))
+    implementation(project(":core"))
+    implementation(project(":di"))
     implementation(project(":data"))
     implementation(project(":domain"))
     implementation(project(":presentation"))
-    implementation(project(":di"))*/
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.material3)
+    implementation(libs.material)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)

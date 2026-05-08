@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
@@ -18,16 +18,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
             buildConfigField("String", "BASE_URL", "\"https://fooapi.com/\"")
         }
         debug {
-            isDebuggable = true
             buildConfigField("String", "BASE_URL", "\"https://fooapi.com/\"")
         }
     }
@@ -52,11 +45,15 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
+    implementation(project(":core"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.material3)
+
+    implementation(libs.material)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
