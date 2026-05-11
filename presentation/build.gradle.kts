@@ -52,10 +52,17 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.material3)
+    implementation(libs.androidx.material3)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material.icons)
+    implementation(libs.navigation.compose)
 
     implementation(libs.material)
+    implementation(libs.coil)
 
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
 
     testImplementation(libs.junit)

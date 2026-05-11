@@ -2,7 +2,6 @@ package com.example.domain.repository
 
 import com.example.core.common.State
 import com.example.domain.model.Movie
-import com.example.domain.model.MoviesPage
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -19,8 +18,8 @@ import kotlinx.coroutines.flow.Flow
  * with fake/stub implementations.
  */
 interface MovieRepository {
-    fun getMovies(page: Int = 1, limit: Int = 20): Flow<State<MoviesPage>>
-    fun searchMovies(query: String, page: Int = 1): Flow<State<MoviesPage>>
+    fun getMovies(page: Int = 1, limit: Int = 20): Flow<State<List<Movie>>>
+    fun searchMovies(query: String, page: Int = 1): Flow<State<List<Movie>>>
     fun getMovieById(id: String): Flow<State<Movie>>
     fun getRandomMovie(): Flow<State<Movie>>
 }

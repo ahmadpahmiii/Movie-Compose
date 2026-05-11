@@ -39,6 +39,8 @@ class MovieDetailViewModel @Inject constructor(
         loadMovieDetail()
     }
 
+    fun retry() = loadMovieDetail()
+
     private fun loadMovieDetail() = viewModelScope.launch {
         getMovieDetailUseCase.invoke(movieId).collect { result ->
             _uiState.value = when (result) {

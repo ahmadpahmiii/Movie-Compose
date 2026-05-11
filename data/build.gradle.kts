@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
 }
 android {
-    namespace = "com.yourcompany.movie.data"
+    namespace = "com.example.data"
     compileSdk = 35
 
     defaultConfig {
@@ -19,6 +19,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 }
 

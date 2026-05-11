@@ -1,7 +1,7 @@
 package com.example.domain.usecase
 
 import com.example.core.common.State
-import com.example.domain.model.MoviesPage
+import com.example.domain.model.Movie
 import com.example.domain.repository.MovieRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.Flow
 class GetMovieUseCase @Inject constructor(
     private val repository: MovieRepository
 ) {
-    operator fun invoke(page: Int = 1, limit: Int = 20): Flow<State<MoviesPage>> {
+    operator fun invoke(page: Int = 1, limit: Int = 20): Flow<State<List<Movie>>> {
         return repository.getMovies(page = page, limit = limit)
     }
 }

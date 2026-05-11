@@ -23,6 +23,5 @@ rootProject.name = "Movie"
 include(":app")
 include(":core")
 include(":data")
-include(":di")
 include(":domain")
 include(":presentation")

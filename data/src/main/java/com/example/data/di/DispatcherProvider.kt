@@ -1,5 +1,6 @@
-package com.example.core.common
+package com.example.data.di
 
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
@@ -27,7 +28,7 @@ interface DispatcherProvider {
  * Injected by Hilt in non-test builds.
  */
 
-class DefaultDispatcherProvider : DispatcherProvider {
+class DefaultDispatcherProvider @Inject constructor() : DispatcherProvider {
     override val main: CoroutineDispatcher = Dispatchers.Main
     override val io: CoroutineDispatcher = Dispatchers.IO
     override val default: CoroutineDispatcher = Dispatchers.Default

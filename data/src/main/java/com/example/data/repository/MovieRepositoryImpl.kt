@@ -1,13 +1,12 @@
 package com.example.data.repository
 
-import com.example.core.common.DispatcherProvider
 import com.example.core.common.State
 import com.example.core.common.map
+import com.example.data.di.DispatcherProvider
 import com.example.data.mapper.toDomain
 import com.example.data.remote.api.ApiService
 import com.example.data.remote.safeApiCall
 import com.example.domain.model.Movie
-import com.example.domain.model.MoviesPage
 import com.example.domain.repository.MovieRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,7 @@ import kotlinx.coroutines.flow.flowOn
  *  - Easy integration with offline caching (combine remote + local sources)
  *  - Clean cancellation via coroutine scope
  *
- * All network operations are dispatched on [DispatcherProvider.io]
+ * All network operations are dispatched on [com.example.di.DispatcherProvider.io]
  * to avoid blocking the main thread.
  */
 
@@ -37,20 +36,21 @@ class MovieRepositoryImpl @Inject constructor(
 ) : MovieRepository {
     override fun getMovies(
         page: Int, limit: Int
-    ): Flow<State<MoviesPage>> = flow {
+    ): Flow<State<List<Movie>>> = flow {
         emit(State.Loading)
         val result = safeApiCall {
-            apiService.getMovies(page = page, limit = limit)
+            apiService.getMovies()
         }
         emit(result.map { it.toDomain() })
     }.flowOn(dispatchers.io)
 
+    //    Error(exception=UnknownException(cause=com.google.gson.JsonSyntaxException: java.lang.NumberFormatException: For input string: "142 min", message=An unexpected error occurred))
     override fun searchMovies(
         query: String, page: Int
-    ): Flow<State<MoviesPage>> = flow {
+    ): Flow<State<List<Movie>>> = flow {
         emit(State.Loading)
         val result = safeApiCall {
-            apiService.getMovies(page = page, query = query)
+            apiService.getMovies()
         }
         emit(result.map { it.toDomain() })
     }.flowOn(dispatchers.io)
@@ -60,7 +60,7 @@ class MovieRepositoryImpl @Inject constructor(
         val result = safeApiCall {
             apiService.getMovieById(id)
         }
-        emit(result.map { it.toDomain() })
+        emit(result.map { it.data.toDomain() })
     }.flowOn(dispatchers.io)
 
     override fun getRandomMovie(): Flow<State<Movie>> = flow {

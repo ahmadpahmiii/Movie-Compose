@@ -1,7 +1,7 @@
 package com.example.domain.usecase
 
 import com.example.core.common.State
-import com.example.domain.model.MoviesPage
+import com.example.domain.model.Movie
 import com.example.domain.repository.MovieRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +23,7 @@ class SearchMoviesUseCase @Inject constructor(
         const val MINIMUM_QUERY_LENGTH = 2
     }
 
-    operator fun invoke(query: String, page: Int = 1): Flow<State<MoviesPage>> {
+    operator fun invoke(query: String, page: Int = 1): Flow<State<List<Movie>>> {
         require(query.length >= MINIMUM_QUERY_LENGTH) {
             "Search query must be at least $MINIMUM_QUERY_LENGTH characters"
         }

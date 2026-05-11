@@ -58,7 +58,7 @@ class MovieListViewModel @Inject constructor(
             when (result) {
                 is State.Loading -> _uiState.value = MovieListUiState.Loading
                 is State.Success -> {
-                    val movies = result.data.movies
+                    val movies = result.data
                     cachedMovies = movies
                     if (movies.isEmpty()) {
                         _uiState.value = MovieListUiState.Empty
@@ -118,7 +118,7 @@ class MovieListViewModel @Inject constructor(
                     } else {
                         currentMovies.filter { movie ->
                             movie.title.contains(query, true) ||
-                                    movie.overview.contains(query, true) ||
+                                    movie.plot.contains(query, true) ||
                                     movie.genres.any { it.name.contains(query, true) }
                         }
                     }

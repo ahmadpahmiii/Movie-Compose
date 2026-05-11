@@ -56,7 +56,6 @@ android {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":di"))
     implementation(project(":data"))
     implementation(project(":domain"))
     implementation(project(":presentation"))
@@ -66,7 +65,9 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.material3)
-    implementation(libs.material)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.ui.tooling.preview)
+    implementation(libs.compose.material.icons)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
