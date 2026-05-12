@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.domain.model.Genre
 import com.example.domain.model.Movie
 import com.example.presentation.theme.GoldRating
 import com.example.presentation.ui.components.ErrorView
@@ -150,7 +149,7 @@ private fun MovieDetailContent(
                 MetaItem(Icons.Filled.AccessTime, movie.runtime)
                 MetaItem(Icons.Filled.Language, "Engleehs")
                 Text(
-                    text = movie.releaseYear,
+                    text = movie.releaseDate,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -240,10 +239,10 @@ private fun MetaItemPreview() {
 }
 
 @Composable
-private fun GenreChip(genre: Genre) {
+private fun GenreChip(genre: String) {
     AssistChip(
         onClick = {},
-        label = { Text(genre.name, style = MaterialTheme.typography.labelSmall) },
+        label = { Text(genre, style = MaterialTheme.typography.labelSmall) },
         shape = MaterialTheme.shapes.small
     )
 }

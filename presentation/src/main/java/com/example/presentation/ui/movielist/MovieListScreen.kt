@@ -281,7 +281,7 @@ private fun FeatureMovieBanner(
                     modifier = Modifier.padding(end = 4.dp)
                 )
                 Text(
-                    text = " ${movie.rating} - ${movie.releaseYear}",
+                    text = " ${movie.rating} - ${movie.releaseDate}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White
                 )

@@ -1,7 +1,7 @@
 package com.example.data.repository
 
 import com.example.core.common.State
-import com.example.core.common.map
+import com.example.core.common.transform
 import com.example.data.di.DispatcherProvider
 import com.example.data.mapper.toDomain
 import com.example.data.remote.api.ApiService
@@ -41,10 +41,11 @@ class MovieRepositoryImpl @Inject constructor(
         val result = safeApiCall {
             apiService.getMovies()
         }
-        emit(result.map { it.toDomain() })
+        emit(result.transform {
+            it.data?.map { movieDto -> movieDto.toDomain() }.orEmpty()
+        })
     }.flowOn(dispatchers.io)
 
-    //    Error(exception=UnknownException(cause=com.google.gson.JsonSyntaxException: java.lang.NumberFormatException: For input string: "142 min", message=An unexpected error occurred))
     override fun searchMovies(
         query: String, page: Int
     ): Flow<State<List<Movie>>> = flow {
@@ -52,7 +53,9 @@ class MovieRepositoryImpl @Inject constructor(
         val result = safeApiCall {
             apiService.getMovies()
         }
-        emit(result.map { it.toDomain() })
+        emit(result.transform {
+            it.data?.map { movieDto -> movieDto.toDomain() }.orEmpty()
+        })
     }.flowOn(dispatchers.io)
 
     override fun getMovieById(id: String): Flow<State<Movie>> = flow {
@@ -60,7 +63,7 @@ class MovieRepositoryImpl @Inject constructor(
         val result = safeApiCall {
             apiService.getMovieById(id)
         }
-        emit(result.map { it.data.toDomain() })
+        emit(result.transform { it.data.toDomain() })
     }.flowOn(dispatchers.io)
 
     override fun getRandomMovie(): Flow<State<Movie>> = flow {
@@ -68,6 +71,6 @@ class MovieRepositoryImpl @Inject constructor(
         val result = safeApiCall {
             apiService.getRandomMovie()
         }
-        emit(result.map { it.toDomain() })
+        emit(result.transform { it.toDomain() })
     }.flowOn(dispatchers.io)
 }

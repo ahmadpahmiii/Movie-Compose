@@ -22,7 +22,7 @@ sealed class State<out T> {
  * Transforms the data inside a [State.Success] using [transform].
  * Passes through [State.Error] and [State.Loading] unchanged.
  */
-inline fun <T, R> State<T>.map(transform: (T) -> R): State<R> {
+inline fun <T, R> State<T>.transform(transform: (T) -> R): State<R> {
     return when (this) {
         is State.Success -> State.Success(transform(data))
         is State.Error -> this

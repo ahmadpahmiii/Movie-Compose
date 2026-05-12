@@ -87,7 +87,7 @@ fun MovieCard(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = movie.releaseYear,
+                text = movie.releaseDate,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )

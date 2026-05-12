@@ -13,11 +13,7 @@ import retrofit2.http.Path
 
 interface ApiService {
     @GET("api/movies")
-    suspend fun getMovies(
-//       /* @Query("page") page: Int = 1,
-//        @Query("limit") limit: Int = 20,
-//        @Query("q") query: String? = null*/
-    ): Response<MoviesDto>
+    suspend fun getMovies(): Response<MoviesDto>
 
     @GET("api/movies/{id}")
     suspend fun getMovieById(

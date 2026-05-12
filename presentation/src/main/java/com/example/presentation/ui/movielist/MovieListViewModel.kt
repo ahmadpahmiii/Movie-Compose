@@ -119,7 +119,7 @@ class MovieListViewModel @Inject constructor(
                         currentMovies.filter { movie ->
                             movie.title.contains(query, true) ||
                                     movie.plot.contains(query, true) ||
-                                    movie.genres.any { it.name.contains(query, true) }
+                                    movie.genres.any { it.contains(query, true) }
                         }
                     }
                     _uiState.update { currentState ->
