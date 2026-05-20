@@ -11,7 +11,7 @@ fun MovieDto.toDomain(): Movie {
     return Movie(
         id = id.orEmpty(),
         title = title.orEmpty(),
-        plot = plot.orEmpty(),
+        description = plot.orEmpty(),
         posterUrl = poster.orEmpty(),
         releaseDate = released.orEmpty(),
         rating = imdbRating.orEmpty(),

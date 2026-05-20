@@ -174,7 +174,7 @@ private fun MovieDetailContent(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = movie.plot,
+                text = movie.description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
