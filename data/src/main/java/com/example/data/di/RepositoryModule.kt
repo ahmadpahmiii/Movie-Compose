@@ -1,7 +1,11 @@
 package com.example.data.di
 
 import com.example.data.repository.MovieRepositoryImpl
+import com.example.data.repository.SearchRepositoryImpl
+import com.example.data.repository.WishlistRepositoryImpl
 import com.example.domain.repository.MovieRepository
+import com.example.domain.repository.SearchRepository
+import com.example.domain.repository.WishlistRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -28,4 +32,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindMovieRepository(impl: MovieRepositoryImpl): MovieRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWishlistRepository(impl: WishlistRepositoryImpl): WishlistRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSearchRepository(impl: SearchRepositoryImpl): SearchRepository
 }

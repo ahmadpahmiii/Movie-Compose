@@ -31,6 +31,8 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.presentation.ui.moviedetail.MovieDetailRoute
 import com.example.presentation.ui.movielist.MovieListRoute
+import com.example.presentation.ui.search.SearchRoute
+import com.example.presentation.ui.wishlist.WishlistRoute
 
 /**
  * Created by Ahmad Pahmi on May 2026
@@ -90,7 +92,11 @@ private fun AppNavHost(
             startDestination = Screen.Search.route
         ) {
             composable(route = Screen.Search.route) {
-                Text(text = "Search Screen")
+                SearchRoute(
+                    onMovieClick = { movie ->
+                        navController.navigate(Screen.MovieDetail.createRoute(movie.id))
+                    }
+                )
             }
 
             movieDetailComposable(navController)
@@ -102,18 +108,12 @@ private fun AppNavHost(
             startDestination = Screen.Wishlist.route
         ) {
             composable(route = Screen.Wishlist.route) {
-                Text(text = "Wishlist Screen")
+                WishlistRoute(onMovieClick = { movie ->
+                    navController.navigate(Screen.MovieDetail.createRoute(movie.id))
+                }, snackbarHostState = snackbarHostState)
             }
-        }
 
-        // Profile Graph
-        navigation(
-            route = Screen.ProfileGraph.route,
-            startDestination = Screen.Profile.route
-        ) {
-            composable(route = Screen.Profile.route) {
-                Text(text = "Profile Screen")
-            }
+            movieDetailComposable(navController)
         }
     }
 }

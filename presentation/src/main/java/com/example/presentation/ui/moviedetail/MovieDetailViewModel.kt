@@ -5,12 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.core.common.State
 import com.example.domain.usecase.GetMovieDetailUseCase
+import com.example.domain.usecase.GetMovieWishlistStatusUseCase
+import com.example.domain.usecase.ToggleWishlistUseCase
 import com.example.presentation.navigation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -27,6 +31,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MovieDetailViewModel @Inject constructor(
     private val getMovieDetailUseCase: GetMovieDetailUseCase,
+    private val toggleWishlistUseCase: ToggleWishlistUseCase,
+    private val wishlistStatusUseCase: GetMovieWishlistStatusUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -35,11 +41,26 @@ class MovieDetailViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<MovieDetailUiState>(MovieDetailUiState.Loading)
     val uiState: StateFlow<MovieDetailUiState> = _uiState.asStateFlow()
 
+    /** Reactive wishlist status – updates instantly across screens. */
+    val ishWishlisted: StateFlow<Boolean> = wishlistStatusUseCase(movieId)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000L),
+            initialValue = false
+        )
+
     init {
         loadMovieDetail()
     }
 
     fun retry() = loadMovieDetail()
+
+    fun toggleWishlist() {
+        val currentState = _uiState.value
+        if (currentState is MovieDetailUiState.Success) {
+            viewModelScope.launch { toggleWishlistUseCase.invoke(currentState.movie) }
+        }
+    }
 
     private fun loadMovieDetail() = viewModelScope.launch {
         getMovieDetailUseCase.invoke(movieId).collect { result ->

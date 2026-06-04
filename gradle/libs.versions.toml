@@ -26,6 +26,7 @@ coroutines = "1.8.1"
 
 # Image Loading
 coil = "2.7.0"
+timber = "5.0.1"
 
 room = "2.6.1"
 
@@ -84,6 +85,9 @@ coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-
 
 # Image Loading
 coil = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+
+# Logging
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }

@@ -51,12 +51,5 @@ val bottomNavItems = listOf(
         unselectedIcon = Icons.Outlined.Favorite,
         graphRoute = Screen.WishlistGraph.route,
         startRoute = Screen.Wishlist.route
-    ),
-    BottomNavItem(
-        label = "Profile",
-        selectedIcon = Icons.Filled.Person,
-        unselectedIcon = Icons.Outlined.Person,
-        graphRoute = Screen.ProfileGraph.route,
-        startRoute = Screen.Profile.route
     )
 )

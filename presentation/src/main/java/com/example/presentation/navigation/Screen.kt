@@ -33,7 +33,4 @@ sealed class Screen(val route: String) {
 
     // ─── Wishlist tab ─────────────────────────────────────────────────────
     data object Wishlist : Screen("wishlist")
-
-    // ─── Profile tab ──────────────────────────────────────────────────────
-    data object Profile : Screen("profile")
 }
