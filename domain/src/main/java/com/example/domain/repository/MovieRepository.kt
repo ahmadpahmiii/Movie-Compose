@@ -20,6 +20,16 @@ import kotlinx.coroutines.flow.Flow
 interface MovieRepository {
     fun getMovies(page: Int = 1, limit: Int = 20): Flow<State<List<Movie>>>
     fun searchMovies(query: String, page: Int = 1): Flow<State<List<Movie>>>
-    fun getMovieById(id: String): Flow<State<Movie>>
-    fun getRandomMovie(): Flow<State<Movie>>
+    fun getMovieById(id: Int): Flow<State<Movie>>
+    fun getRandomCachedMovie(): Flow<State<Movie>>
+
+    // --- Wishlist ---
+    fun getWishlistMovies(): Flow<State<List<Movie>>>
+    suspend fun toggleWishlist(movieId: Int, isWishlisted: Boolean)
+    fun isMovieWishlisted(movieId: Int): Flow<Boolean>
+
+    // --- Recent Search ---
+    fun getRecentSearches(): Flow<State<List<Movie>>>
+    suspend fun addMovieToRecentSearch(movieId: Int)
+    suspend fun clearRecentSearches()
 }

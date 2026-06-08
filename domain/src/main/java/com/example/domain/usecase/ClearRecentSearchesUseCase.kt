@@ -2,14 +2,15 @@ package com.example.domain.usecase
 
 import com.example.domain.repository.MovieRepository
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 
 /**
  * Created by Ahmad Pahmi on May 2026
  */
 
-class GetMovieWishlistStatusUseCase @Inject constructor(
+class ClearRecentSearchesUseCase @Inject constructor(
     private val repository: MovieRepository
 ) {
-    operator fun invoke(movieId: Int): Flow<Boolean> = repository.isMovieWishlisted(movieId)
+    suspend operator fun invoke() {
+        repository.clearRecentSearches()
+    }
 }

@@ -54,7 +54,7 @@ fun MovieCard(
             .clickable { onClick.invoke(movie) }
     ) {
         AsyncImage(
-            model = movie.posterUrl,
+            model = movie.posterPath,
             contentDescription = movie.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -81,7 +81,7 @@ fun MovieCard(
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = movie.rating,
+                text = "${movie.voteAverage}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )

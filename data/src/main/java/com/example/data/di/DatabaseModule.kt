@@ -41,16 +41,4 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideCachedMovieDao(database: MovieDatabase) = database.cachedMovieDao()
-
-    @Provides
-    @Singleton
-    fun provideRecentlyViewedDao(database: MovieDatabase) = database.recentlyViewedDao()
-
-    @Provides
-    @Singleton
-    fun provideSearchHistoryDao(database: MovieDatabase) = database.searchHistoryDao()
-
-    @Provides
-    @Singleton
-    fun provideWishlistDao(database: MovieDatabase) = database.wishlistDao()
 }

@@ -33,7 +33,7 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): State<T> {
                 }
             }
 
-            response.code() == 404 -> State.Error(AppException.NotFoundException)
+            response.code() == 404 -> State.Error(AppException.NotFoundException())
             response.code() in 400..499 -> State.Error(
                 AppException.ApiException(response.code(), response.message())
             )
@@ -45,9 +45,9 @@ suspend fun <T> safeApiCall(apiCall: suspend () -> Response<T>): State<T> {
             else -> State.Error(AppException.UnknownException(message = "Unexpected ${response.code()}"))
         }
     } catch (_: UnknownHostException) {
-        State.Error(AppException.NoInternetException)
+        State.Error(AppException.NoInternetException())
     } catch (_: SocketTimeoutException) {
-        State.Error(AppException.TimeoutException)
+        State.Error(AppException.TimeoutException())
     } catch (e: Exception) {
         State.Error(AppException.UnknownException(cause = e))
     }

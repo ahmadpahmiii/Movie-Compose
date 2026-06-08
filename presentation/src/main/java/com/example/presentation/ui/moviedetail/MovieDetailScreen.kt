@@ -172,12 +172,12 @@ private fun CollapsingMovieDetail(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if (movie.genres.isNotEmpty()) {
+                if (movie.genreIds.isNotEmpty()) {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        movie.genres.forEach { genre ->
+                        movie.genreIds.forEach { genre ->
                             AssistChip(
                                 onClick = {},
-                                label = { Text(genre) },
+                                label = { Text("$genre") },
                                 shape = RoundedCornerShape(20.dp)
                             )
                         }
@@ -246,7 +246,7 @@ private fun CollapsingHeader(
     ) {
         // Backdrop image fades out as toolbar collapses
         AsyncImage(
-            model = movie.posterUrl,
+            model = movie.posterPath,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -299,7 +299,7 @@ private fun CollapsingHeader(
 private fun RatingRow(movie: Movie) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Filled.Favorite, null, tint = GoldRating, modifier = Modifier.size(16.dp))
-        Text(" ${movie.rating} - ${movie.releaseDate} - ${movie.runtime}")
+        Text(" ${movie.voteAverage} - ${movie.releaseDate} - ${movie.originalLanguage}")
     }
 }
 
@@ -349,7 +349,7 @@ private fun MovieDetailContent(
                 .aspectRatio(16f / 9f)
         ) {
             AsyncImage(
-                model = movie.posterUrl,
+                model = movie.posterPath,
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
@@ -394,8 +394,8 @@ private fun MovieDetailContent(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RatingBadge(movie.rating, 100)
-                MetaItem(Icons.Filled.AccessTime, movie.runtime)
+                RatingBadge(movie.voteAverage, 100)
+                MetaItem(Icons.Filled.AccessTime, "Time")
                 MetaItem(Icons.Filled.Language, "Engleehs")
                 Text(
                     text = movie.releaseDate,
@@ -406,10 +406,10 @@ private fun MovieDetailContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             //Genres
-            if (movie.genres.isNotEmpty()) {
+            if (movie.genreIds.isNotEmpty()) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    movie.genres.forEach { genre ->
-                        GenreChip(genre)
+                    movie.genreIds.forEach { genre ->
+                        GenreChip("$genre")
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -433,7 +433,7 @@ private fun MovieDetailContent(
 }
 
 @Composable
-private fun RatingBadge(rating: String, voteCount: Int) {
+private fun RatingBadge(rating: Double, voteCount: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = Icons.Filled.Star,
@@ -458,7 +458,7 @@ private fun RatingBadge(rating: String, voteCount: Int) {
 @Preview(showBackground = true)
 @Composable
 private fun RatingBadgePreview() {
-    RatingBadge(rating = "9.3", voteCount = 1484)
+    RatingBadge(rating = 9.3, voteCount = 1484)
 }
 
 @Composable()
@@ -502,15 +502,20 @@ fun MovieDetailScreenPreview() {
     MovieDetailScreen(
         uiState = MovieDetailUiState.Success(
             movie = Movie(
-                id = "1",
-                title = "The Shawshank Redemption",
-                overview = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-                posterUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-                releaseDate = "",
-                runtime = "",
-                rating = "",
-                language = listOf(""),
-                genres = listOf("")
+                id = 1,
+                title = "Inception",
+                overview = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                posterPath = "https://image.tmdb.org/t/p/w500/edv5CZv0jH9NXN2FU6N2gaDNBzH.jpg",
+                backdropPath = "https://image.tmdb.org/t/p/w500/8ZTPjS7SBy96z99v9uURM9P9S9P.jpg",
+                releaseDate = "2010-07-15",
+                voteAverage = 8.4,
+                voteCount = 34500,
+                originalLanguage = "en",
+                genreIds = listOf(28, 878, 12),
+                isAdult = false,
+                includeVideo = false,
+                popularity = 8.0,
+                originalTitle = ""
             )
         ),
         onBackPressed = {},

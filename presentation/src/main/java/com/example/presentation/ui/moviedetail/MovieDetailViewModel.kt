@@ -36,7 +36,7 @@ class MovieDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val movieId: String = checkNotNull(savedStateHandle[Screen.MovieDetail.ARG_MOVIE_ID])
+    private val movieId: Int = checkNotNull(savedStateHandle[Screen.MovieDetail.ARG_MOVIE_ID])
 
     private val _uiState = MutableStateFlow<MovieDetailUiState>(MovieDetailUiState.Loading)
     val uiState: StateFlow<MovieDetailUiState> = _uiState.asStateFlow()
@@ -58,7 +58,7 @@ class MovieDetailViewModel @Inject constructor(
     fun toggleWishlist() {
         val currentState = _uiState.value
         if (currentState is MovieDetailUiState.Success) {
-            viewModelScope.launch { toggleWishlistUseCase.invoke(currentState.movie) }
+            viewModelScope.launch { toggleWishlistUseCase.invoke(currentState.movie.id) }
         }
     }
 

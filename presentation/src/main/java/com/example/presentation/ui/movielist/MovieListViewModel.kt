@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.core.common.State
 import com.example.domain.model.Movie
 import com.example.domain.usecase.GetMovieUseCase
-import com.example.domain.usecase.GetRandomMovieUseCase
+import com.example.domain.usecase.GetRandomCachedMovieUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.FlowPreview
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Created by Ahmad Pahmi on May 2026
@@ -38,7 +39,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MovieListViewModel @Inject constructor(
     private val getMovieUseCase: GetMovieUseCase,
-    private val getRandomMovieUseCase: GetRandomMovieUseCase
+    private val getRandomCachedMovieUseCase: GetRandomCachedMovieUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<MovieListUiState>(MovieListUiState.Loading)
     val uiState: StateFlow<MovieListUiState> = _uiState.asStateFlow()
@@ -108,7 +109,7 @@ class MovieListViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     private fun observeSearchQuery() {
         _searchQuery
-            .debounce(300L)
+            .debounce(300.milliseconds)
             .distinctUntilChanged()
             .onEach { query ->
                 val currentMovies = cachedMovies
@@ -118,8 +119,7 @@ class MovieListViewModel @Inject constructor(
                     } else {
                         currentMovies.filter { movie ->
                             movie.title.contains(query, true) ||
-                                    movie.overview.contains(query, true) ||
-                                    movie.genres.any { it.contains(query, true) }
+                                    movie.overview.contains(query, true)
                         }
                     }
                     _uiState.update { currentState ->
@@ -136,7 +136,7 @@ class MovieListViewModel @Inject constructor(
     }
 
     private fun loadFeaturedMovie() = viewModelScope.launch {
-        getRandomMovieUseCase.invoke().collect { result ->
+        getRandomCachedMovieUseCase.invoke().collect { result ->
             if (result is State.Success) {
                 _uiState.update { currentState ->
                     if (currentState is MovieListUiState.Success) {

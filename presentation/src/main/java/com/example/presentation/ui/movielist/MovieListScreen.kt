@@ -243,7 +243,7 @@ private fun FeatureMovieBanner(
             .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
     ) {
         AsyncImage(
-            model = movie.posterUrl,
+            model = movie.posterPath,
             contentDescription = movie.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -281,7 +281,7 @@ private fun FeatureMovieBanner(
                     modifier = Modifier.padding(end = 4.dp)
                 )
                 Text(
-                    text = " ${movie.rating} - ${movie.releaseDate}",
+                    text = " ${movie.voteAverage} - ${movie.releaseDate}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White
                 )

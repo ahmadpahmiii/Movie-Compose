@@ -1,35 +1,20 @@
 package com.example.domain.usecase
 
-import com.example.domain.model.Movie
-import com.example.domain.repository.WishlistRepository
-import javax.inject.Inject
+import com.example.domain.repository.MovieRepository
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
 /**
  * Created by Ahmad Pahmi on May 2026
  */
 
-/**
- * Toggles a movie's wishlist status.
- *
- * Architectural Decision: The toggle logic (check → add/remove) lives
- * here in the use case, not in the ViewModel. This ensures the business
- * rule is centrally located and testable independently of any UI concern.
- *
- * Returns the new wishlist state (true = added, false = removed).
- */
 class ToggleWishlistUseCase @Inject constructor(
-    private val wishlistRepository: WishlistRepository
+    private val repository: MovieRepository
 ) {
-    suspend operator fun invoke(movie: Movie): Boolean {
-        val isCurrentlyInWishlist = wishlistRepository.isMovieInWishlist(movie.id).first()
-
-        return if (isCurrentlyInWishlist) {
-            wishlistRepository.removeFromWishlist(movie.id)
-            false
-        } else {
-            wishlistRepository.addToWishlist(movie)
-            true
-        }
+    suspend operator fun invoke(movieId: Int): Boolean {
+        val isCurrentlyInWishlist = repository.isMovieWishlisted(movieId).first()
+        val newState = !isCurrentlyInWishlist
+        repository.toggleWishlist(movieId, newState)
+        return newState
     }
 }

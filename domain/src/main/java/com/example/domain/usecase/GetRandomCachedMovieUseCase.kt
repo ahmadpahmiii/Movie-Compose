@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.Flow
  */
 
 /** Use case for fetching a random/featured movie. */
-class GetRandomMovieUseCase @Inject constructor(
+class GetRandomCachedMovieUseCase @Inject constructor(
     private val repository: MovieRepository
 ) {
-    operator fun invoke(): Flow<State<Movie>> = repository.getRandomMovie()
+    operator fun invoke(): Flow<State<Movie>> = repository.getRandomCachedMovie()
 }

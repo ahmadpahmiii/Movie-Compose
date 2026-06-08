@@ -32,8 +32,8 @@ fun <T> Flow<T>.asResult(): Flow<State<T>> {
 fun Throwable.toAppException(): AppException {
     return when (this) {
         is AppException -> this
-        is UnknownHostException -> AppException.NoInternetException
-        is SocketTimeoutException -> AppException.TimeoutException
+        is UnknownHostException -> AppException.NoInternetException()
+        is SocketTimeoutException -> AppException.TimeoutException()
         is IOException -> AppException.UnknownException(cause = this)
         else -> AppException.UnknownException(cause = this, message = message ?: "Unknown error")
     }

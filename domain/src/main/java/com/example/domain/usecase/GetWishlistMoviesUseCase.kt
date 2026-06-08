@@ -1,7 +1,8 @@
 package com.example.domain.usecase
 
+import com.example.core.common.State
 import com.example.domain.model.Movie
-import com.example.domain.repository.WishlistRepository
+import com.example.domain.repository.MovieRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
  */
 
 class GetWishlistMoviesUseCase @Inject constructor(
-    private val repository: WishlistRepository
+    private val repository: MovieRepository
 ) {
-    operator fun invoke(): Flow<List<Movie>> = repository.getWishlistMovies()
+    operator fun invoke(): Flow<State<List<Movie>>> = repository.getWishlistMovies()
 }

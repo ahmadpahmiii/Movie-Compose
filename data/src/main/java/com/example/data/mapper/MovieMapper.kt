@@ -3,6 +3,7 @@ package com.example.data.mapper
 import com.example.core.extension.orFalse
 import com.example.core.extension.orZero
 import com.example.data.remote.dto.MoviesDto
+import com.example.domain.entity.CachedMovieEntity
 import com.example.domain.model.Movie
 
 /**
@@ -10,24 +11,50 @@ import com.example.domain.model.Movie
  */
 
 object MovieMapper {
-    fun MoviesDto.toMovieList(): List<Movie> {
-        return this.results?.map {
-            Movie(
-                id = it.id.orZero(),
-                title = it.title.orEmpty(),
-                originalTitle = it.originalTitle.orEmpty(),
-                originalLanguage = it.originalLanguage.orEmpty(),
-                overview = it.overview.orEmpty(),
-                releaseDate = it.releaseDate.orEmpty(),
-                genreIds = it.genreIds ?: emptyList(),
-                popularity = it.popularity.orZero(),
-                voteAverage = it.voteAverage.orZero(),
-                voteCount = it.voteCount.orZero(),
-                posterPath = it.posterPath.orEmpty(),
-                backdropPath = it.backdropPath.orEmpty(),
-                adult = it.adult.orFalse(),
-                video = it.video.orFalse()
-            )
-        }.orEmpty()
+    fun MoviesDto.MovieItemDto.toCachedMovieEntity(): CachedMovieEntity {
+        return CachedMovieEntity(
+            id = id.orZero(),
+            title = title.orEmpty(),
+            originalTitle = originalTitle.orEmpty(),
+            originalLanguage = originalLanguage.orEmpty(),
+            overview = overview.orEmpty(),
+            releaseDate = releaseDate.orEmpty(),
+            genreIds = genreIds.orEmpty(),
+            popularity = popularity.orZero(),
+            voteAverage = voteAverage.orZero(),
+            voteCount = voteCount.orZero(),
+            posterPath = posterPath.orEmpty(),
+            backdropPath = backdropPath.orEmpty(),
+            isAdult = adult.orFalse(),
+            includeVideo = video.orFalse()
+        )
     }
+
+    fun CachedMovieEntity.toMovie(): Movie {
+        return Movie(
+            id = id,
+            title = title,
+            originalTitle = originalTitle,
+            originalLanguage = originalLanguage,
+            overview = overview,
+            releaseDate = releaseDate,
+            genreIds = genreIds,
+            popularity = popularity,
+            voteAverage = voteAverage,
+            voteCount = voteCount,
+            posterPath = getPosterUrl(posterPath),
+            backdropPath = getBackdropUrl(backdropPath),
+            isAdult = isAdult,
+            includeVideo = includeVideo
+        )
+    }
+
+    private fun getPosterUrl(path: String?): String =
+        if (path.isNullOrEmpty()) "" else "$IMAGE_BASE_URL_POSTER$path"
+
+    private fun getBackdropUrl(path: String?): String =
+        if (path.isNullOrEmpty()) "" else "$IMAGE_BASE_URL_BACKDROP$path"
+
+    const val IMAGE_BASE_URL_POSTER = "https://image.tmdb.org/t/p/w185/"
+    const val IMAGE_BASE_URL_BACKDROP = "https://image.tmdb.org/t/p/w1280"
 }

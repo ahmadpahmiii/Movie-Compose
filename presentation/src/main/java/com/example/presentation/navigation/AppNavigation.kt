@@ -133,7 +133,7 @@ private fun NavGraphBuilder.movieDetailComposable(
         route = Screen.MovieDetail.route,
         arguments = listOf(
             navArgument(Screen.MovieDetail.ARG_MOVIE_ID) {
-                type = NavType.StringType
+                type = NavType.IntType
             }
         ),
         enterTransition = { slideInHorizontally { it } + fadeIn() },
@@ -190,41 +190,3 @@ private fun MovieBottomBar(navController: NavController) {
 private fun MovieBottomBarPreview() {
     MovieBottomBar(navController = rememberNavController())
 }
-
-/*
-@Composable
-fun AppNavigation(
-    navController: NavHostController = rememberNavController()
-) {
-    NavHost(
-        navController = navController,
-        startDestination = Screen.MovieList.route
-    ) {
-        composable(
-            route = Screen.MovieList.route,
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() }
-        ) {
-            MovieListRoute(
-                onMovieClick = { movie ->
-                    navController.navigate(Screen.MovieDetail.createRoute(movie.id))
-                }
-            )
-        }
-
-        composable(
-            route = Screen.MovieDetail.route,
-            arguments = listOf(
-                navArgument(Screen.MovieDetail.ARG_MOVIE_ID) {
-                    type = NavType.StringType
-                }
-            ),
-            enterTransition = { fadeIn() },
-            exitTransition = { fadeOut() }
-        ) {
-            MovieDetailRoute(
-                onBackPressed = { navController.popBackStack() }
-            )
-        }
-    }
-}*/

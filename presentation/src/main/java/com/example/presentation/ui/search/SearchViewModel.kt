@@ -2,8 +2,8 @@ package com.example.presentation.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.domain.usecase.AddMovieToRecentSearchUseCase
 import com.example.domain.usecase.GetSearchHistoryUseCase
-import com.example.domain.usecase.SaveSearchQueryUseCase
 import com.example.domain.usecase.SearchMoviesLocallyUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -52,7 +51,7 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     private val searchMoviesLocallyUseCase: SearchMoviesLocallyUseCase,
     private val getSearchHistoryUseCase: GetSearchHistoryUseCase,
-    private val saveSearchQueryUseCase: SaveSearchQueryUseCase
+    private val addMovieToRecentSearchUseCase: AddMovieToRecentSearchUseCase
 ) : ViewModel() {
 
     private val _query = MutableStateFlow("")
@@ -85,7 +84,7 @@ class SearchViewModel @Inject constructor(
             query = query,
             isLoading = isLoading,
             searchResults = results,
-            recentSearches = history,
+            recentSearches = history.getOrNull().orEmpty(),
             error = null
         )
     }.stateIn(
@@ -99,7 +98,7 @@ class SearchViewModel @Inject constructor(
     }
 
     fun onSearchSubmit(query: String) = viewModelScope.launch {
-        saveSearchQueryUseCase(query)
+//        addMovieToRecentSearchUseCase(query)
     }
 
     fun onHistoryItemClicked(query: String) {

@@ -24,13 +24,19 @@ sealed class AppException(
     ) : AppException(message)
 
     /** Device has no internet connectivity. */
-    data object NoInternetException : AppException("No internet connection available")
+    data class NoInternetException(
+        override val message: String = "No internet connection available"
+    ) : AppException(message)
 
     /** Request timed out. */
-    data object TimeoutException : AppException("Request timed out")
+    data class TimeoutException(
+        override val message: String = "Request timed out"
+    ) : AppException(message)
 
     /** The requested resource was not found (404). */
-    data object NotFoundException : AppException("Resource not found")
+    data class NotFoundException(
+        override val message: String = "Resource not found"
+    ) : AppException(message)
 
     /** Unexpected/unknown error. */
     data class UnknownException(

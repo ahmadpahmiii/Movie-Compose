@@ -12,24 +12,40 @@ import kotlinx.coroutines.flow.Flow
 class LocalDataSource @Inject constructor(
     private val cachedMovieDao: CachedMovieDao
 ) {
-    suspend fun saveSearchQuery(query: String) {
-        searchHistoryDao.insertSearch(
-            SearchHistoryEntity(query = query.trim())
-        )
-    }
+    // --- Movie Cache Operations ---
 
-    fun getRecentSearches(limit: Int = 10): Flow<List<SearchHistoryEntity>> =
-        searchHistoryDao.getRecentSearches(limit)
+    fun getCachedMovies(): Flow<List<CachedMovieEntity>> =
+        cachedMovieDao.getCachedMovies()
 
-    suspend fun deleteSearch(query: String) =
-        searchHistoryDao.deleteSearch(query)
+    fun getMovieById(movieId: Int): Flow<CachedMovieEntity?> =
+        cachedMovieDao.getMovieById(movieId)
 
-    suspend fun clearHistory() =
-        searchHistoryDao.clearHistory()
+    suspend fun cacheMovies(movies: List<CachedMovieEntity>) =
+        cachedMovieDao.insertMovies(movies)
 
     fun searchCachedMovies(query: String): Flow<List<CachedMovieEntity>> =
         cachedMovieDao.searchCachedMovies(query)
 
-    suspend fun cacheMovies(movies: List<CachedMovieEntity>) =
-        cachedMovieDao.insertMovies(movies)
+    suspend fun clearCache() = cachedMovieDao.clearCache()
+
+    // --- Wishlist Operations ---
+
+    fun getWishlistMovies(): Flow<List<CachedMovieEntity>> =
+        cachedMovieDao.getWishlistMovies()
+
+    suspend fun updateWishlistStatus(movieId: Int, isWishlisted: Boolean) =
+        cachedMovieDao.updateWishlistStatus(movieId, isWishlisted)
+
+    fun isMovieWishlisted(movieId: Int): Flow<Boolean> =
+        cachedMovieDao.isMovieWishlisted(movieId)
+
+    // --- Recent Search Operations ---
+
+    fun getRecentSearchedMovies(): Flow<List<CachedMovieEntity>> =
+        cachedMovieDao.getRecentSearchedMovies()
+
+    suspend fun updateRecentSearchStatus(movieId: Int, isRecentlySearched: Boolean) =
+        cachedMovieDao.updateRecentSearchStatus(movieId, isRecentlySearched)
+
+    suspend fun clearRecentSearches() = cachedMovieDao.clearRecentSearches()
 }

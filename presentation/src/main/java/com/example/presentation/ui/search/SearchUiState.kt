@@ -19,7 +19,7 @@ data class SearchUiState(
     val query: String = "",
     val isLoading: Boolean = false,
     val searchResults: List<Movie> = emptyList(),
-    val recentSearches: List<String> = emptyList(),
+    val recentSearches: List<Movie> = emptyList(),
     val error: String? = null
 ) {
     val isIdle: Boolean get() = query.isEmpty()

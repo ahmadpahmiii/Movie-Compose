@@ -33,7 +33,7 @@ class WishlistViewModel @Inject constructor(
         _removedMovieTitle
     ) { movies, isLoading, removedTitle ->
         WishlistUiState(
-            movies = movies,
+            movies = movies.getOrNull().orEmpty(),
             isLoading = isLoading,
             removedMovieTitle = removedTitle
         )
@@ -47,7 +47,7 @@ class WishlistViewModel @Inject constructor(
     }
 
     fun removeFromWishlist(movie: Movie) = viewModelScope.launch {
-        toggleWishlistUseCase(movie)
+        toggleWishlistUseCase(movie.id)
         _removedMovieTitle.value = movie.title
     }
 

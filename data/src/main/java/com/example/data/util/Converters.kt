@@ -1,5 +1,9 @@
 package com.example.data.util
 
+import androidx.room.TypeConverter
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
 /**
  * Created by Ahmad Pahmi on May 2026
  */
@@ -7,24 +11,23 @@ package com.example.data.util
 /**
  * Room TypeConverters for non-primitive types.
  *
- * We serialize [Genre] lists to JSON strings for storage.
+ * We serialize lists to JSON strings for storage.
  * Architectural Decision: Keeping this simple with Gson matches our existing
  * dependency. For production apps with large datasets, consider a separate
- * Genre table with a many-to-many relationship for better query performance.
+ * table for better query performance.
  */
-/*
 class Converters {
 
     private val gson = Gson()
 
     @TypeConverter
-    fun fromGenreList(genres: List<Genre>): String {
-        return gson.toJson(genres)
+    fun fromIntList(value: List<Int>?): String {
+        return gson.toJson(value)
     }
 
     @TypeConverter
-    fun toGenreList(json: String): List<Genre> {
-        val type = object : TypeToken<List<Genre>>() {}.type
-        return gson.fromJson(json, type) ?: emptyList()
+    fun toIntList(value: String): List<Int> {
+        val type = object : TypeToken<List<Int>>() {}.type
+        return gson.fromJson(value, type) ?: emptyList()
     }
-}*/
+}

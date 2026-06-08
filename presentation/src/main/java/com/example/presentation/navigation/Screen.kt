@@ -25,7 +25,7 @@ sealed class Screen(val route: String) {
     // ─── Movie Detail (shared across tabs) ────────────────────────────────
     data object MovieDetail : Screen("movie_detail/{movieId}") {
         const val ARG_MOVIE_ID = "movieId"
-        fun createRoute(movieId: String) = "movie_detail/$movieId"
+        fun createRoute(movieId: Int) = "movie_detail/$movieId"
     }
 
     // ─── Search tab ───────────────────────────────────────────────────────
