@@ -4,7 +4,7 @@ import com.example.core.common.AppException
 import com.example.core.common.State
 import com.example.core.common.transform
 import com.example.data.di.DispatcherProvider
-import com.example.data.local.datasource.SearchLocalDataSource
+import com.example.data.local.datasource.LocalDataSource
 import com.example.data.mapper.toCachedMovieEntity
 import com.example.data.mapper.toDomain
 import com.example.data.remote.api.ApiService
@@ -40,7 +40,7 @@ import javax.inject.Inject
 
 class MovieRepositoryImpl @Inject constructor(
     private val apiService: ApiService,
-    private val localDataSource: SearchLocalDataSource,
+    private val localDataSource: LocalDataSource,
     private val dispatchers: DispatcherProvider,
 ) : MovieRepository {
 
@@ -71,7 +71,7 @@ class MovieRepositoryImpl @Inject constructor(
 
         // Fetch fresh data from network in parallel
         launch {
-            val result = safeApiCall { apiService.getMovies() }
+            val result = safeApiCall { apiService.getNowPlayingMovies() }
 
             when (result) {
                 is State.Loading -> {}

@@ -1,7 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.di.DispatcherProvider
-import com.example.data.local.datasource.SearchLocalDataSource
+import com.example.data.local.datasource.LocalDataSource
 import com.example.data.mapper.toDomain
 import com.example.domain.model.Movie
 import com.example.domain.repository.SearchRepository
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
  */
 
 class SearchRepositoryImpl @Inject constructor(
-    private val localDataSource: SearchLocalDataSource,
+    private val localDataSource: LocalDataSource,
     private val dispatchers: DispatcherProvider
 ) : SearchRepository {
 

@@ -13,13 +13,18 @@ package com.example.domain.model
  */
 
 data class Movie(
-    val id: String,
+    val id: Int,
     val title: String,
-    val description: String,
-    val posterUrl: String,
+    val originalTitle: String,
+    val originalLanguage: String,
+    val overview: String,
     val releaseDate: String,
-    val rating: String,
-    val genres: List<String>,
-    val runtime: String,
-    val language: List<String>
+    val genreIds: List<Int>,
+    val popularity: Double,
+    val voteAverage: Double,
+    val voteCount: Int,
+    val posterPath: String,
+    val backdropPath: String,
+    val isAdult: Boolean,
+    val includeVideo: Boolean
 )

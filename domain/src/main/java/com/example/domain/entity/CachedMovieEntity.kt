@@ -14,37 +14,71 @@ import androidx.room.PrimaryKey
  * Architectural Decision: We cache the full API response in Room so the
  * list screen loads instantly from the database while we fetch fresh data.
  * This is the "stale-while-revalidate" pattern.
+ *
+ * This entity also tracks user-specific states such as wishlist status and
+ * recent search history to provide a seamless personalized experience
+ * without requiring additional network calls for local state management.
  */
 @Entity(tableName = "cached_movies")
 data class CachedMovieEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
-    val id: String,
+    val id: Int,
 
-    @ColumnInfo(name = "title")
+    @ColumnInfo("title")
     val title: String,
 
-    @ColumnInfo(name = "description")
-    val description: String,
+    @ColumnInfo(name = "original_title")
+    val originalTitle: String,
 
-    @ColumnInfo(name = "poster_url")
-    val posterUrl: String,
+    @ColumnInfo(name = "original_language")
+    val originalLanguage: String,
+
+    @ColumnInfo(name = "overview")
+    val overview: String,
 
     @ColumnInfo(name = "release_date")
     val releaseDate: String,
 
-    @ColumnInfo(name = "rating")
-    val rating: String,
+    @ColumnInfo(name = "genre_ids")
+    val genreIds: List<Int>,
 
-    @ColumnInfo(name = "genres")
-    val genres: String,
+    @ColumnInfo(name = "popularity")
+    val popularity: Double,
 
-    @ColumnInfo(name = "runtime")
-    val runtime: String,
+    @ColumnInfo(name = "vote_average")
+    val voteAverage: Double,
 
-    @ColumnInfo(name = "language")
-    val language: String,
+    @ColumnInfo(name = "vote_count")
+    val voteCount: Int,
+
+    @ColumnInfo(name = "poster_path")
+    val posterPath: String,
+
+    @ColumnInfo(name = "backdrop_path")
+    val backdropPath: String,
+
+    @ColumnInfo(name = "is_adult")
+    val isAdult: Boolean,
+
+    @ColumnInfo(name = "include_video")
+    val includeVideo: Boolean,
 
     @ColumnInfo(name = "cached_at")
-    val cachedAt: Long = System.currentTimeMillis()
+    val cachedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "viewed_at")
+    val viewedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "is_recently_searched")
+    val isRecentlySearched: Boolean = false,
+
+    @ColumnInfo(name = "searched_at")
+    val searchedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "is_wishlisted")
+    val isWishlisted: Boolean = false,
+
+    @ColumnInfo(name = "wishlisted_at")
+    val wishlistedAt: Long = System.currentTimeMillis()
 )

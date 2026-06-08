@@ -1,22 +1,33 @@
 package com.example.data.mapper
 
-import com.example.data.remote.dto.MovieDto
+import com.example.core.extension.orFalse
+import com.example.core.extension.orZero
+import com.example.data.remote.dto.MoviesDto
 import com.example.domain.model.Movie
 
 /**
  * Created by Ahmad Pahmi on May 2026
  */
 
-fun MovieDto.toDomain(): Movie {
-    return Movie(
-        id = id.orEmpty(),
-        title = title.orEmpty(),
-        description = plot.orEmpty(),
-        posterUrl = poster.orEmpty(),
-        releaseDate = released.orEmpty(),
-        rating = imdbRating.orEmpty(),
-        genres = genre?.split(",").orEmpty(),
-        runtime = runtime.orEmpty(),
-        language = language?.split(",").orEmpty()
-    )
+object MovieMapper {
+    fun MoviesDto.toMovieList(): List<Movie> {
+        return this.results?.map {
+            Movie(
+                id = it.id.orZero(),
+                title = it.title.orEmpty(),
+                originalTitle = it.originalTitle.orEmpty(),
+                originalLanguage = it.originalLanguage.orEmpty(),
+                overview = it.overview.orEmpty(),
+                releaseDate = it.releaseDate.orEmpty(),
+                genreIds = it.genreIds ?: emptyList(),
+                popularity = it.popularity.orZero(),
+                voteAverage = it.voteAverage.orZero(),
+                voteCount = it.voteCount.orZero(),
+                posterPath = it.posterPath.orEmpty(),
+                backdropPath = it.backdropPath.orEmpty(),
+                adult = it.adult.orFalse(),
+                video = it.video.orFalse()
+            )
+        }.orEmpty()
+    }
 }

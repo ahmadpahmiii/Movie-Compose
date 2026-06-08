@@ -210,7 +210,7 @@ private fun SearchScreenPreview() {
                 Movie(
                     id = "1",
                     title = "The Shawshank Redemption",
-                    description = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+                    overview = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
                     posterUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
                     releaseDate = "1994-09-23",
                     rating = "90",

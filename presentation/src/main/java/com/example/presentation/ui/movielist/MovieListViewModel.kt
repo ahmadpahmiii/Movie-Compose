@@ -118,7 +118,7 @@ class MovieListViewModel @Inject constructor(
                     } else {
                         currentMovies.filter { movie ->
                             movie.title.contains(query, true) ||
-                                    movie.description.contains(query, true) ||
+                                    movie.overview.contains(query, true) ||
                                     movie.genres.any { it.contains(query, true) }
                         }
                     }

@@ -1,6 +1,5 @@
 package com.example.data.remote.api
 
-import com.example.data.remote.dto.MovieDetailDto
 import com.example.data.remote.dto.MovieDto
 import com.example.data.remote.dto.MoviesDto
 import retrofit2.Response
@@ -12,14 +11,14 @@ import retrofit2.http.Path
  */
 
 interface ApiService {
-    @GET("api/movies")
-    suspend fun getMovies(): Response<MoviesDto>
+    @GET("movie/now_playing")
+    suspend fun getNowPlayingMovies(): Response<MoviesDto>
 
-    @GET("api/movies/{id}")
+ /*   @GET("api/movies/{id}")
     suspend fun getMovieById(
         @Path("id") id: String
-    ): Response<MovieDetailDto>
+    ): Response<MovieItemDto>
 
     @GET("api/movies/rand")
-    suspend fun getRandomMovie(): Response<MovieDto>
+    suspend fun getRandomMovie(): Response<MovieDto>*/
 }

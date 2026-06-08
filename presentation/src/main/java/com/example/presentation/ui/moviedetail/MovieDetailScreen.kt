@@ -192,7 +192,7 @@ private fun CollapsingMovieDetail(
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = movie.description,
+                    text = movie.overview,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
@@ -423,7 +423,7 @@ private fun MovieDetailContent(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = movie.description,
+                text = movie.overview,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
@@ -504,7 +504,7 @@ fun MovieDetailScreenPreview() {
             movie = Movie(
                 id = "1",
                 title = "The Shawshank Redemption",
-                description = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+                overview = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
                 posterUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
                 releaseDate = "",
                 runtime = "",

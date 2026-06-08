@@ -1,7 +1,6 @@
 package com.example.data.repository
 
 import com.example.data.di.DispatcherProvider
-import com.example.data.local.datasource.WishlistLocalDataSource
 import com.example.data.mapper.toDomain
 import com.example.data.mapper.toWishlistEntity
 import com.example.domain.model.Movie

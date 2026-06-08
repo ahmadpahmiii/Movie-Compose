@@ -3,13 +3,7 @@ package com.example.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.data.local.dao.CachedMovieDao
-import com.example.data.local.dao.RecentlyViewedDao
-import com.example.data.local.dao.SearchHistoryDao
-import com.example.data.local.dao.WishlistDao
 import com.example.domain.entity.CachedMovieEntity
-import com.example.domain.entity.RecentlyViewedEntity
-import com.example.domain.entity.SearchHistoryEntity
-import com.example.domain.entity.WishlistMovieEntity
 
 /**
  * Created by Ahmad Pahmi on May 2026

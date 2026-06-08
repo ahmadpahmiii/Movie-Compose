@@ -1,9 +1,7 @@
 package com.example.data.local.datasource
 
 import com.example.data.local.dao.CachedMovieDao
-import com.example.data.local.dao.SearchHistoryDao
 import com.example.domain.entity.CachedMovieEntity
-import com.example.domain.entity.SearchHistoryEntity
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -11,8 +9,7 @@ import kotlinx.coroutines.flow.Flow
  * Created by Ahmad Pahmi on May 2026
  */
 
-class SearchLocalDataSource @Inject constructor(
-    private val searchHistoryDao: SearchHistoryDao,
+class LocalDataSource @Inject constructor(
     private val cachedMovieDao: CachedMovieDao
 ) {
     suspend fun saveSearchQuery(query: String) {
