@@ -6,15 +6,15 @@ import com.example.domain.model.Movie
  * Created by Ahmad Pahmi on May 2026
  */
 
-sealed class MovieListUiState {
-    data object Loading : MovieListUiState()
+sealed class HomeUiState {
+    data object Loading : HomeUiState()
     data class Success(
         val movies: List<Movie>,
         val filteredMovies: List<Movie>,
         val searchQuery: String = "",
         val isRefreshing: Boolean = false,
         val featuredMovie: Movie? = null
-    ) : MovieListUiState() {
+    ) : HomeUiState() {
         val isSearchActive: Boolean get() = searchQuery.isNotEmpty()
         val displayMovies: List<Movie> get() = if (isSearchActive) filteredMovies else movies
     }
@@ -22,7 +22,7 @@ sealed class MovieListUiState {
     data class Error(
         val message: String,
         val retryAction: (() -> Unit)? = null
-    ) : MovieListUiState()
+    ) : HomeUiState()
 
-    data object Empty : MovieListUiState()
+    data object Empty : HomeUiState()
 }

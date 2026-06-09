@@ -43,12 +43,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.domain.model.Movie
+import com.example.presentation.theme.DeepNavy
 import com.example.presentation.theme.GoldRating
 import com.example.presentation.ui.components.EmptyView
 import com.example.presentation.ui.components.ErrorView
@@ -67,14 +69,14 @@ import com.example.presentation.ui.components.MovieListShimmer
  */
 
 @Composable
-fun MovieListRoute(
+fun HomeScreenRoute(
     onMovieClick: (Movie) -> Unit,
-    viewModel: MovieListViewModel = hiltViewModel()
+    viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
-    MovieListScreen(
+    HomeScreen(
         uiState = uiState,
         searchQuery = searchQuery,
         onMovieClick = onMovieClick,
@@ -85,8 +87,8 @@ fun MovieListRoute(
 }
 
 @Composable
-fun MovieListScreen(
-    uiState: MovieListUiState,
+fun HomeScreen(
+    uiState: HomeUiState,
     searchQuery: String,
     onMovieClick: (Movie) -> Unit,
     onSearchQueryChanged: (String) -> Unit,
@@ -94,11 +96,13 @@ fun MovieListScreen(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isRefreshing = (uiState as? MovieListUiState.Success)?.isRefreshing == true
+    val isRefreshing = (uiState as? HomeUiState.Success)?.isRefreshing == true
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .background(DeepNavy)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -127,12 +131,12 @@ fun MovieListScreen(
             }
 
             when (uiState) {
-                is MovieListUiState.Loading -> item {
+                is HomeUiState.Loading -> item {
                     Spacer(modifier = Modifier.height(16.dp))
                     MovieListShimmer()
                 }
 
-                is MovieListUiState.Success -> {
+                is HomeUiState.Success -> {
                     if (!uiState.isSearchActive && uiState.featuredMovie != null) {
                         item {
                             FeatureMovieBanner(
@@ -183,7 +187,7 @@ fun MovieListScreen(
                     }
                 }
 
-                is MovieListUiState.Error -> item {
+                is HomeUiState.Error -> item {
                     ErrorView(
                         title = uiState.message,
                         description = uiState.message,
@@ -191,7 +195,7 @@ fun MovieListScreen(
                     )
                 }
 
-                is MovieListUiState.Empty -> item { EmptyView() }
+                is HomeUiState.Empty -> item { EmptyView() }
             }
         }
     }
@@ -325,26 +329,27 @@ private fun SearchBarViewPreview() {
     )
 }
 
-/*
 @Composable
 @Preview(showBackground = true, device = Devices.PIXEL_4, showSystemUi = true)
 fun MoveListScreenPreview() {
-    MovieListScreen(
-        uiState = MovieListUiState.Success(
+    HomeScreen(
+        uiState = HomeUiState.Success(
             movies = listOf(
                 Movie(
-                    id = "1",
-                    title = "The Shawshank Redemption",
-                    overview = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-                    posterUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-                    backdropUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-                    releaseDate = "1994-09-23",
-                    rating = 9.3,
-                    voteCount = 1484,
-                    genres = emptyList(),
-                    runtime = 142,
-                    language = "English",
-                    popularity = 7.6
+                    id = 1,
+                    title = "Inception",
+                    overview = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                    posterPath = "https://image.tmdb.org/t/p/w500/edv5CZvfk0YUPmUIBQPRO4s5B3y.jpg",
+                    backdropPath = "https://image.tmdb.org/t/p/w1280/8ZTPRkdUiM36vU90mG8vTS4OGvG.jpg",
+                    releaseDate = "2010-07-15",
+                    voteAverage = 8.4,
+                    voteCount = 34500,
+                    popularity = 120.5,
+                    originalLanguage = "en",
+                    genreIds = emptyList(),
+                    isAdult = true,
+                    includeVideo = false,
+                    originalTitle = ""
                 )
             ),
             filteredMovies = emptyList(),
@@ -356,4 +361,4 @@ fun MoveListScreenPreview() {
         onClearSearch = {},
         onRefresh = {}
     )
-}*/
+}

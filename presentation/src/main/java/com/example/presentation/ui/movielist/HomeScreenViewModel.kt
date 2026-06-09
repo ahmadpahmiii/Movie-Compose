@@ -37,12 +37,12 @@ import kotlin.time.Duration.Companion.milliseconds
  */
 
 @HiltViewModel
-class MovieListViewModel @Inject constructor(
+class HomeScreenViewModel @Inject constructor(
     private val getMovieUseCase: GetMovieUseCase,
     private val getRandomCachedMovieUseCase: GetRandomCachedMovieUseCase
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow<MovieListUiState>(MovieListUiState.Loading)
-    val uiState: StateFlow<MovieListUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -57,14 +57,14 @@ class MovieListViewModel @Inject constructor(
     fun loadMovies() = viewModelScope.launch {
         getMovieUseCase.invoke().collect { result ->
             when (result) {
-                is State.Loading -> _uiState.value = MovieListUiState.Loading
+                is State.Loading -> _uiState.value = HomeUiState.Loading
                 is State.Success -> {
                     val movies = result.data
                     cachedMovies = movies
                     if (movies.isEmpty()) {
-                        _uiState.value = MovieListUiState.Empty
+                        _uiState.value = HomeUiState.Empty
                     } else {
-                        _uiState.value = MovieListUiState.Success(
+                        _uiState.value = HomeUiState.Success(
                             movies = movies,
                             filteredMovies = movies,
                             searchQuery = _searchQuery.value
@@ -75,7 +75,7 @@ class MovieListViewModel @Inject constructor(
                     loadFeaturedMovie()
                 }
 
-                is State.Error -> _uiState.value = MovieListUiState.Error(
+                is State.Error -> _uiState.value = HomeUiState.Error(
                     message = result.exception.message ?: "Failed to load movies",
                     retryAction = ::loadMovies
                 )
@@ -85,9 +85,9 @@ class MovieListViewModel @Inject constructor(
 
     fun refresh() {
         val currentState = _uiState.value
-        if (currentState is MovieListUiState.Success) {
+        if (currentState is HomeUiState.Success) {
             _uiState.update {
-                (it as? MovieListUiState.Success)?.copy(isRefreshing = true) ?: it
+                (it as? HomeUiState.Success)?.copy(isRefreshing = true) ?: it
             }
         }
         loadMovies()
@@ -123,7 +123,7 @@ class MovieListViewModel @Inject constructor(
                         }
                     }
                     _uiState.update { currentState ->
-                        if (currentState is MovieListUiState.Success) {
+                        if (currentState is HomeUiState.Success) {
                             currentState.copy(
                                 filteredMovies = filtered,
                                 searchQuery = query
@@ -139,7 +139,7 @@ class MovieListViewModel @Inject constructor(
         getRandomCachedMovieUseCase.invoke().collect { result ->
             if (result is State.Success) {
                 _uiState.update { currentState ->
-                    if (currentState is MovieListUiState.Success) {
+                    if (currentState is HomeUiState.Success) {
                         currentState.copy(featuredMovie = result.data)
                     } else currentState
                 }

@@ -17,10 +17,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,7 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.example.presentation.ui.moviedetail.MovieDetailRoute
-import com.example.presentation.ui.movielist.MovieListRoute
+import com.example.presentation.ui.movielist.HomeScreenRoute
 import com.example.presentation.ui.search.SearchRoute
 import com.example.presentation.ui.wishlist.WishlistRoute
 
@@ -42,11 +42,17 @@ import com.example.presentation.ui.wishlist.WishlistRoute
 fun AppNavigation() {
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    val shouldShowBottomBar = currentDestination?.route != Screen.MovieDetail.route
 
     Scaffold(
         snackbarHost = { snackbarHostState },
         bottomBar = {
-            MovieBottomBar(navController)
+            if (shouldShowBottomBar) {
+                MovieBottomBar(navController, currentDestination)
+            }
         }
     ) { innerPadding ->
         AppNavHost(
@@ -77,7 +83,7 @@ private fun AppNavHost(
             startDestination = Screen.Home.route
         ) {
             composable(route = Screen.Home.route) {
-                MovieListRoute(
+                HomeScreenRoute(
                     onMovieClick = { movie ->
                         navController.navigate(Screen.MovieDetail.createRoute(movie.id))
                     }
@@ -148,10 +154,10 @@ private fun NavGraphBuilder.movieDetailComposable(
 }
 
 @Composable
-private fun MovieBottomBar(navController: NavController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-
+private fun MovieBottomBar(
+    navController: NavController,
+    currentDestination: NavDestination?
+) {
     NavigationBar {
         bottomNavItems.forEach { item ->
             val isSelected = currentDestination?.hierarchy?.any {
@@ -188,5 +194,5 @@ private fun MovieBottomBar(navController: NavController) {
 @Composable
 @Preview(showBackground = true)
 private fun MovieBottomBarPreview() {
-    MovieBottomBar(navController = rememberNavController())
+    MovieBottomBar(navController = rememberNavController(), currentDestination = null)
 }
