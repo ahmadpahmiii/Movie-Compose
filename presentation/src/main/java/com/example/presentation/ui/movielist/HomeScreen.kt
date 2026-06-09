@@ -50,7 +50,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.domain.model.Movie
-import com.example.presentation.theme.DeepNavy
 import com.example.presentation.theme.GoldRating
 import com.example.presentation.ui.components.EmptyView
 import com.example.presentation.ui.components.ErrorView
@@ -102,7 +101,6 @@ fun HomeScreen(
         onRefresh = onRefresh,
         modifier = modifier
             .fillMaxSize()
-            .background(DeepNavy)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
