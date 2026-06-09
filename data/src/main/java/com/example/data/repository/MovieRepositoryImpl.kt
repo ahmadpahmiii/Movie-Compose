@@ -48,7 +48,7 @@ class MovieRepositoryImpl @Inject constructor(
         }
 
         // Fetch fresh data from network
-        val result = safeApiCall { apiService.getNowPlayingMovies() }
+        val result = safeApiCall { apiService.getPopularMovies() }
 
         when (result) {
             is State.Success -> {

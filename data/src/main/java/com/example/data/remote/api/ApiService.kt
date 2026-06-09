@@ -9,6 +9,6 @@ import retrofit2.http.GET
  */
 
 interface ApiService {
-    @GET("movie/now_playing")
-    suspend fun getNowPlayingMovies(): Response<MoviesDto>
+    @GET("movie/popular")
+    suspend fun getPopularMovies(): Response<MoviesDto>
 }
