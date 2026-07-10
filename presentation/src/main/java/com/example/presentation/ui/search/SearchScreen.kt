@@ -1,5 +1,9 @@
 package com.example.presentation.ui.search
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,17 +22,14 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -36,17 +37,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.domain.model.Movie
+import com.example.presentation.designsystem.AppAnimation
+import com.example.presentation.designsystem.AppIconSize
+import com.example.presentation.designsystem.AppShape
+import com.example.presentation.designsystem.AppSpacing
+import com.example.presentation.designsystem.MovieColors
+import com.example.presentation.designsystem.MovieTypography
 import com.example.presentation.ui.components.EmptyView
 import com.example.presentation.ui.components.MovieCard
-
-/**
- * Created by Ahmad Pahmi on June 2026
- */
 
 @Composable
 fun SearchRoute(
@@ -77,39 +83,22 @@ fun SearchScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(MovieColors.PrimaryBackground)
             .statusBarsPadding()
     ) {
-        // Search Header
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Text("Search", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = uiState.query,
-                onValueChange = onQueryChanged,
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Movies, genres, actors...") },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
-                trailingIcon = {
-                    if (uiState.query.isNotEmpty()) {
-                        IconButton(onClick = onClearQuery) {
-                            Icon(Icons.Filled.Clear, contentDescription = "Clear")
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            )
-        }
+        SearchHeader(
+            query = uiState.query,
+            onQueryChanged = onQueryChanged,
+            onQuerySubmit = onQuerySubmit,
+            onClearQuery = onClearQuery
+        )
 
         when {
             uiState.isLoading -> CircularProgressIndicator(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
-                    .padding(32.dp)
+                    .padding(AppSpacing.XXL),
+                color = MovieColors.MovieAccent
             )
 
             uiState.showHistory -> SearchHistory(
@@ -118,7 +107,7 @@ fun SearchScreen(
             )
 
             uiState.isEmpty -> EmptyView(
-                title = "No Results for \"${uiState.query}\"",
+                title = "No results for \"${uiState.query}\"",
                 description = "Check the spelling or try a different term."
             )
 
@@ -128,10 +117,58 @@ fun SearchScreen(
             )
 
             uiState.isIdle -> EmptyView(
-                title = "Discover Movies",
-                description = "Search by Title, genre, or language"
+                title = "Discover movies",
+                description = "Search by title, genre, or language."
             )
         }
+    }
+}
+
+@Composable
+private fun SearchHeader(
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    onQuerySubmit: (String) -> Unit,
+    onClearQuery: () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = AppSpacing.L, vertical = AppSpacing.M)) {
+        Text(
+            text = "Search",
+            style = MovieTypography.MovieTitle,
+            color = MovieColors.TextPrimary,
+            modifier = Modifier.semantics { heading() }
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.L))
+        OutlinedTextField(
+            value = query,
+            onValueChange = {
+                onQueryChanged(it)
+                if (it.isNotBlank()) onQuerySubmit(it)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Movies, genres, actors...") },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+            trailingIcon = {
+                AnimatedVisibility(
+                    visible = query.isNotEmpty(),
+                    enter = fadeIn(animationSpec = AppAnimation.fastTween()),
+                    exit = fadeOut(animationSpec = AppAnimation.fastTween())
+                ) {
+                    IconButton(onClick = onClearQuery) {
+                        Icon(Icons.Filled.Clear, contentDescription = "Clear search")
+                    }
+                }
+            },
+            singleLine = true,
+            shape = AppShape.Large,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MovieColors.SurfaceVariant,
+                unfocusedContainerColor = MovieColors.SurfaceVariant,
+                focusedIndicatorColor = MovieColors.MovieAccent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = MovieColors.MovieAccent
+            )
+        )
     }
 }
 
@@ -140,37 +177,41 @@ private fun SearchHistory(
     searches: List<String>,
     onHistoryClick: (String) -> Unit
 ) {
-    LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
-        item {
-            Row(
+    LazyColumn(contentPadding = PaddingValues(vertical = AppSpacing.S)) {
+        item(key = "history-title", contentType = "title") {
+            Text(
+                text = "Recent Searches",
+                style = MovieTypography.SectionTitle,
+                color = MovieColors.TextPrimary,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) { Text("Recent Searches", style = MaterialTheme.typography.titleSmall) }
+                    .padding(horizontal = AppSpacing.L, vertical = AppSpacing.S)
+                    .semantics { heading() }
+            )
         }
-        items(searches) { query ->
+        items(
+            items = searches,
+            key = { it },
+            contentType = { "history-item" }
+        ) { query ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onHistoryClick(query) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = AppSpacing.L, vertical = AppSpacing.M),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Filled.History,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
+                    tint = MovieColors.TextTertiary,
+                    modifier = Modifier.size(AppIconSize.M)
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(query, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.width(AppSpacing.M))
+                Text(query, style = MovieTypography.Body, color = MovieColors.TextPrimary)
             }
             HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thickness = DividerDefaults.Thickness,
-                color = DividerDefaults.color
+                modifier = Modifier.padding(horizontal = AppSpacing.L),
+                color = MovieColors.DividerColor
             )
         }
     }
@@ -182,13 +223,13 @@ private fun SearchResultGrid(
     onMovieClick: (Movie) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        columns = GridCells.Adaptive(minSize = 156.dp),
+        contentPadding = PaddingValues(AppSpacing.L),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.M),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.L)
     ) {
-        items(items = movies, key = { it.id }) { movie ->
-            MovieCard(movie = movie, onClick = onMovieClick)
+        items(items = movies, key = { it.id }, contentType = { "movie-card" }) { movie ->
+            MovieCard(movie = movie, onClick = onMovieClick, modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -196,7 +237,7 @@ private fun SearchResultGrid(
 @Composable
 @Preview(showBackground = true)
 private fun SearchHistoryPreview() {
-    SearchHistory(listOf("ashjd", "sjdhf")) { }
+    SearchHistory(listOf("Inception", "Arrival")) { }
 }
 
 @Composable
@@ -204,7 +245,7 @@ private fun SearchHistoryPreview() {
 private fun SearchScreenPreview() {
     SearchScreen(
         uiState = SearchUiState(
-            query = "dj",
+            query = "in",
             isLoading = false,
             searchResults = listOf(),
             error = null

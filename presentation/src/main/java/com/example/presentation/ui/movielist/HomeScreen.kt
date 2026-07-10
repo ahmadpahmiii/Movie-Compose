@@ -18,55 +18,53 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.domain.model.Movie
-import com.example.presentation.theme.DeepNavy
-import com.example.presentation.theme.GoldRating
+import com.example.presentation.designsystem.AppAnimation
+import com.example.presentation.designsystem.AppShape
+import com.example.presentation.designsystem.AppSpacing
+import com.example.presentation.designsystem.MovieColors
+import com.example.presentation.designsystem.MovieTypography
 import com.example.presentation.ui.components.EmptyView
 import com.example.presentation.ui.components.ErrorView
-import com.example.presentation.ui.components.MovieCard
+import com.example.presentation.ui.components.MetadataText
 import com.example.presentation.ui.components.MovieListShimmer
-
-/**
- * Created by Ahmad Pahmi on May 2026
- */
-
-/**
- * Route composable – owns the ViewModel, connects state to the screen.
- *
- * Architectural Decision: Separating Route (stateful) from Screen (stateless)
- * allows Screen to be tested/previewed without Hilt or ViewModel injection.
- */
+import com.example.presentation.ui.components.PrimaryMovieButton
+import com.example.presentation.ui.components.RatingBadge
+import com.example.presentation.ui.components.SecondaryMovieButton
+import com.example.presentation.ui.components.movieSection
 
 @Composable
 fun HomeScreenRoute(
@@ -97,107 +95,114 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val isRefreshing = (uiState as? HomeUiState.Success)?.isRefreshing == true
+    val listState = rememberLazyListState()
+
+    val movies = (uiState as? HomeUiState.Success)?.movies ?: emptyList()
+    val rankedMovies by derivedMovieSections(movies)
+
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
         modifier = modifier
             .fillMaxSize()
-            .background(DeepNavy)
+            .background(MovieColors.PrimaryBackground)
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(bottom = AppSpacing.XL)
         ) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Movie App",
-                        style = MaterialTheme.typography.displayLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    SearchBarView(
-                        query = searchQuery,
-                        onQueryChanged = onSearchQueryChanged,
-                        onClearSearch = onClearSearch
-                    )
-                }
+            item(key = "home-header", contentType = "header") {
+                HomeHeader(
+                    searchQuery = searchQuery,
+                    onSearchQueryChanged = onSearchQueryChanged,
+                    onClearSearch = onClearSearch
+                )
             }
 
             when (uiState) {
-                is HomeUiState.Loading -> item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                is HomeUiState.Loading -> item(key = "loading", contentType = "loading") {
+                    Spacer(modifier = Modifier.height(AppSpacing.L))
                     MovieListShimmer()
                 }
 
                 is HomeUiState.Success -> {
-                    if (!uiState.isSearchActive && uiState.featuredMovie != null) {
-                        item {
-                            FeatureMovieBanner(
-                                movie = uiState.featuredMovie,
-                                onClick = onMovieClick,
-                                modifier = Modifier.padding(horizontal = 24.dp)
-                            )
-                        }
-                    }
-
-                    // Section title
-                    item {
-                        Text(
-                            text = if (uiState.isSearchActive) "Search Results" else "Popular Movies",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    // Movie Grid
                     if (uiState.displayMovies.isEmpty()) {
-                        item {
+                        item(key = "empty", contentType = "empty") {
                             EmptyView(
-                                title = "No movies found ${uiState.searchQuery}",
-                                description = "Try searching for something else"
+                                title = "No movies found for ${uiState.searchQuery}",
+                                description = "Try another title, genre, or language."
                             )
                         }
+                    } else if (uiState.isSearchActive) {
+                        movieSection(
+                            title = "Search Results",
+                            movies = uiState.displayMovies,
+                            onMovieClick = onMovieClick
+                        )
                     } else {
-                        item {
-                            LazyRow(
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier.semantics {
-                                    contentDescription = "Movie List"
-                                }
-                            ) {
-                                items(
-                                    items = uiState.displayMovies,
-                                    key = { movie -> movie.id }
-                                ) { movie ->
-                                    MovieCard(
-                                        movie = movie,
-                                        onClick = onMovieClick
-                                    )
-                                }
+                        val featuredMovie = uiState.featuredMovie ?: uiState.movies.firstOrNull()
+                        if (featuredMovie != null) {
+                            item(key = "hero-${featuredMovie.id}", contentType = "hero") {
+                                HeroMovieCard(
+                                    movie = featuredMovie,
+                                    onMovieClick = onMovieClick,
+                                    modifier = Modifier.padding(horizontal = AppSpacing.L)
+                                )
                             }
                         }
+
+                        movieSection("Trending Now", rankedMovies.trending, onMovieClick)
+                        movieSection("Popular Movies", rankedMovies.popular, onMovieClick)
+                        movieSection("Top Rated", rankedMovies.topRated, onMovieClick)
+                        movieSection("Upcoming", rankedMovies.upcoming, onMovieClick)
                     }
                 }
 
-                is HomeUiState.Error -> item {
+                is HomeUiState.Error -> item(key = "error", contentType = "error") {
                     ErrorView(
-                        title = uiState.message,
+                        title = "Unable to load movies",
                         description = uiState.message,
                         onRetry = onRefresh
                     )
                 }
 
-                is HomeUiState.Empty -> item { EmptyView() }
+                is HomeUiState.Empty -> item(key = "empty", contentType = "empty") { EmptyView() }
             }
         }
+    }
+}
+
+@Composable
+private fun HomeHeader(
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
+    onClearSearch: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = AppSpacing.L, vertical = AppSpacing.M)
+    ) {
+        Text(
+            text = "Movie App",
+            style = MovieTypography.AppTitle,
+            color = MovieColors.TextPrimary,
+            modifier = Modifier.semantics { heading() }
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.S))
+        Text(
+            text = "Curated stories for tonight",
+            style = MovieTypography.Caption,
+            color = MovieColors.TextTertiary
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.L))
+        SearchBarView(
+            query = searchQuery,
+            onQueryChanged = onSearchQueryChanged,
+            onClearSearch = onClearSearch
+        )
     }
 }
 
@@ -214,52 +219,63 @@ private fun SearchBarView(
         modifier = modifier.fillMaxWidth(),
         placeholder = { Text("Search movies...") },
         leadingIcon = {
-            Icon(imageVector = Icons.Filled.Search, contentDescription = "search")
+            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
         },
         trailingIcon = {
-            AnimatedVisibility(visible = query.isNotEmpty(), enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(
+                visible = query.isNotEmpty(),
+                enter = fadeIn(animationSpec = AppAnimation.fastTween()),
+                exit = fadeOut(animationSpec = AppAnimation.fastTween())
+            ) {
                 IconButton(onClick = onClearSearch) {
-                    Icon(imageVector = Icons.Filled.Clear, contentDescription = "clear")
+                    Icon(imageVector = Icons.Filled.Clear, contentDescription = "Clear search")
                 }
             }
         },
         singleLine = true,
-        shape = RoundedCornerShape(12.dp),
+        shape = AppShape.Large,
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            focusedContainerColor = MovieColors.SurfaceVariant,
+            unfocusedContainerColor = MovieColors.SurfaceVariant,
+            focusedIndicatorColor = MovieColors.MovieAccent,
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = MovieColors.MovieAccent
         )
     )
 }
 
 @Composable
-private fun FeatureMovieBanner(
+private fun HeroMovieCard(
     movie: Movie,
-    onClick: (Movie) -> Unit,
+    onMovieClick: (Movie) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
-            .clickable { onClick.invoke(movie) }
             .fillMaxWidth()
-            .aspectRatio(16f / 9f)
-            .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+            .aspectRatio(16f / 10f)
+            .clip(AppShape.ExtraLarge)
+            .clickable { onMovieClick(movie) }
+            .semantics {
+                role = Role.Button
+                contentDescription = "Featured movie ${movie.title}"
+            }
     ) {
         AsyncImage(
-            model = movie.posterPath,
-            contentDescription = movie.title,
+            model = movie.backdropPath.ifBlank { movie.posterPath },
+            contentDescription = "${movie.title} backdrop",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-
-        // gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f))
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.05f),
+                            MovieColors.Scrim
+                        )
                     )
                 )
         )
@@ -267,57 +283,66 @@ private fun FeatureMovieBanner(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(16.dp)
+                .padding(AppSpacing.L)
         ) {
+            RatingBadge(rating = movie.voteAverage)
+            Spacer(modifier = Modifier.height(AppSpacing.M))
             Text(
                 text = movie.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                style = MovieTypography.MovieTitle,
+                color = MovieColors.TextPrimary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = GoldRating,
-                    modifier = Modifier.padding(end = 4.dp)
+            Spacer(modifier = Modifier.height(AppSpacing.S))
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.M)) {
+                MetadataText(text = movie.releaseDate.take(4).ifBlank { "TBA" })
+                MetadataText(text = movie.originalLanguage.uppercase())
+            }
+            Spacer(modifier = Modifier.height(AppSpacing.S))
+            Text(
+                text = movie.overview,
+                style = MovieTypography.Body,
+                color = MovieColors.TextSecondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(AppSpacing.L))
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.M)) {
+                PrimaryMovieButton(
+                    text = "Watch",
+                    onClick = { onMovieClick(movie) },
+                    icon = Icons.Filled.PlayArrow
                 )
-                Text(
-                    text = " ${movie.voteAverage} - ${movie.releaseDate}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White
+                SecondaryMovieButton(
+                    text = "Save",
+                    onClick = { onMovieClick(movie) },
+                    icon = Icons.Filled.FavoriteBorder
                 )
             }
         }
     }
 }
 
-/*
-@Composable
-@Preview(showBackground = true)
-private fun FeatureMovieBannerPreview() {
-    FeatureMovieBanner(
-        movie = Movie(
-            id = "1",
-            title = "The Shawshank Redemption",
-            overview = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-            posterUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-            backdropUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-            releaseDate = "1994-09-23",
-            rating = 9.3,
-            voteCount = 1484,
-            genres = emptyList(),
-            runtime = 142,
-            language = "English",
-            popularity = 7.6
-        ),
-        onClick = {}
-    )
-}
-*/
 
+@Composable
+private fun derivedMovieSections(movies: List<Movie>) = remember(movies) {
+    derivedStateOf {
+        MovieSections(
+            trending = movies.sortedByDescending(Movie::popularity).take(10),
+            popular = movies.take(10),
+            topRated = movies.sortedByDescending(Movie::voteAverage).take(10),
+            upcoming = movies.sortedByDescending(Movie::releaseDate).take(10)
+        )
+    }
+}
+
+private data class MovieSections(
+    val trending: List<Movie>,
+    val popular: List<Movie>,
+    val topRated: List<Movie>,
+    val upcoming: List<Movie>
+)
 
 @Composable
 @Preview(showBackground = true)
@@ -334,26 +359,9 @@ private fun SearchBarViewPreview() {
 fun MoveListScreenPreview() {
     HomeScreen(
         uiState = HomeUiState.Success(
-            movies = listOf(
-                Movie(
-                    id = 1,
-                    title = "Inception",
-                    overview = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-                    posterPath = "https://image.tmdb.org/t/p/w500/edv5CZvfk0YUPmUIBQPRO4s5B3y.jpg",
-                    backdropPath = "https://image.tmdb.org/t/p/w1280/8ZTPRkdUiM36vU90mG8vTS4OGvG.jpg",
-                    releaseDate = "2010-07-15",
-                    voteAverage = 8.4,
-                    voteCount = 34500,
-                    popularity = 120.5,
-                    originalLanguage = "en",
-                    genreIds = emptyList(),
-                    isAdult = true,
-                    includeVideo = false,
-                    originalTitle = ""
-                )
-            ),
+            movies = previewMovies(),
             filteredMovies = emptyList(),
-            featuredMovie = null
+            featuredMovie = previewMovies().first()
         ),
         searchQuery = "",
         onMovieClick = {},
@@ -362,3 +370,22 @@ fun MoveListScreenPreview() {
         onRefresh = {}
     )
 }
+
+private fun previewMovies() = listOf(
+    Movie(
+        id = 1,
+        title = "Inception",
+        overview = "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.",
+        posterPath = "https://image.tmdb.org/t/p/w500/edv5CZvfk0YUPmUIBQPRO4s5B3y.jpg",
+        backdropPath = "https://image.tmdb.org/t/p/w1280/8ZTPRkdUiM36vU90mG8vTS4OGvG.jpg",
+        releaseDate = "2010-07-15",
+        voteAverage = 8.4,
+        voteCount = 34500,
+        popularity = 120.5,
+        originalLanguage = "en",
+        genreIds = emptyList(),
+        isAdult = false,
+        includeVideo = false,
+        originalTitle = "Inception"
+    )
+)

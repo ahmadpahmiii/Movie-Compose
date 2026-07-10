@@ -1,46 +1,37 @@
 package com.example.presentation.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.domain.model.Movie
-import com.example.presentation.theme.GoldRating
-
-/**
- * Created by Ahmad Pahmi on May 2026
- */
-
-/**
- * Stateless composable for a movie card.
- *
- * Architectural Decision: Stateless – takes [Movie] and a click handler as parameters.
- * No ViewModel access inside; state is hoisted. This makes it:
- *  - Reusable in any screen
- *  - Previewable without DI
- *  - Trivially testable
- *
- * Uses @Stable [Movie] domain model (data class) for Compose stability.
- */
+import com.example.presentation.designsystem.AppElevation
+import com.example.presentation.designsystem.AppShape
+import com.example.presentation.designsystem.AppSpacing
+import com.example.presentation.designsystem.MovieColors
+import com.example.presentation.designsystem.MovieTypography
 
 @Composable
 fun MovieCard(
@@ -48,66 +39,91 @@ fun MovieCard(
     onClick: (Movie) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    Card(
         modifier = modifier
-            .width(150.dp)
-            .clickable { onClick.invoke(movie) }
+            .width(CardWidth)
+            .semantics {
+                role = Role.Button
+                contentDescription = "${movie.title}, rated ${"%.1f".format(movie.voteAverage)}"
+            }
+            .clickable { onClick(movie) },
+        shape = AppShape.Large,
+        elevation = CardDefaults.cardElevation(defaultElevation = AppElevation.Card),
+        colors = CardDefaults.cardColors(containerColor = MovieColors.CardBackground)
     ) {
-        AsyncImage(
-            model = movie.posterPath,
-            contentDescription = movie.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(12.dp))
-        )
-        Spacer(modifier = Modifier.height(8.dp))
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(AppShape.Large)
+            ) {
+                MoviePoster(
+                    imageUrl = movie.posterPath,
+                    title = movie.title,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    MovieColors.CardOverlay
+                                ),
+                                startY = 220f
+                            )
+                        )
+                )
+                RatingBadge(
+                    rating = movie.voteAverage,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(AppSpacing.S)
+                )
+            }
 
-        Text(
-            text = movie.title,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = "Rating",
-                tint = GoldRating,
-                modifier = Modifier.size(12.dp)
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = "${movie.voteAverage}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = movie.releaseDate,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
+            Column(modifier = Modifier.padding(AppSpacing.M)) {
+                Text(
+                    text = movie.title,
+                    style = MovieTypography.MovieSubtitle,
+                    color = MovieColors.TextPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(AppSpacing.S))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetadataText(text = movie.releaseDate.take(4).ifBlank { "TBA" })
+                    Spacer(modifier = Modifier.width(AppSpacing.S))
+                    MetadataText(text = movie.originalLanguage.uppercase())
+                }
+            }
         }
     }
 }
 
-/*
-@Preview(showBackground = true)
+private val CardWidth = 156.dp
+
+@Preview
 @Composable
 private fun MovieCardPreview() {
-    MovieTheme {
-        MovieCard(
-            movie = Movie(
-                id = "1", title = "Inception", overview = "A thief who enters dreams.",
-                posterUrl = "", backdropUrl = "", releaseDate = "2010-07-16",
-                rating = 8.8, voteCount = 35000, genres = listOf(Genre(1, "Sci-Fi")),
-                runtime = 148, language = "en", popularity = 90.0
-            ),
-            onClick = {}
-        )
-    }
-}*/
+    MovieCard(
+        movie = Movie(
+            id = 1,
+            title = "Inception",
+            originalTitle = "Inception",
+            originalLanguage = "en",
+            overview = "A thief who enters dreams.",
+            releaseDate = "2010-07-15",
+            genreIds = listOf(28, 878),
+            popularity = 120.5,
+            voteAverage = 8.4,
+            voteCount = 34500,
+            posterPath = "",
+            backdropPath = "",
+            isAdult = false,
+            includeVideo = false
+        ),
+        onClick = {}
+    )
+}

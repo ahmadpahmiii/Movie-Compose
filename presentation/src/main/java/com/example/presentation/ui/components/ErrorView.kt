@@ -6,18 +6,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.example.presentation.designsystem.AppIconSize
+import com.example.presentation.designsystem.AppSpacing
+import com.example.presentation.designsystem.MovieColors
+import com.example.presentation.designsystem.MovieTypography
 
 /**
  * Created by Ahmad Pahmi on May 2026
@@ -33,34 +35,35 @@ fun ErrorView(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(AppSpacing.XXL),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            imageVector = Icons.Rounded.Star,
+            imageVector = Icons.Rounded.ErrorOutline,
             contentDescription = null,
-            modifier = Modifier.padding(bottom = 16.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            modifier = Modifier
+                .padding(bottom = AppSpacing.L)
+                .size(AppIconSize.XL),
+            tint = MovieColors.ErrorColor
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.L))
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
+            style = MovieTypography.SectionTitle,
+            textAlign = TextAlign.Center,
+            color = MovieColors.TextPrimary
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.S))
         Text(
             text = description,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MovieTypography.Body,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            color = MovieColors.TextSecondary
         )
         if (onRetry != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onRetry) {
-                Text("Retry")
-            }
+            Spacer(modifier = Modifier.height(AppSpacing.L))
+            PrimaryMovieButton(text = "Retry", onClick = onRetry)
         }
     }
 }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,22 +15,18 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -42,27 +37,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.domain.model.Movie
-import com.example.presentation.theme.GoldRating
+import com.example.presentation.designsystem.AppAnimation
+import com.example.presentation.designsystem.AppIconSize
+import com.example.presentation.designsystem.AppMovieSize
+import com.example.presentation.designsystem.AppSpacing
+import com.example.presentation.designsystem.MovieColors
+import com.example.presentation.designsystem.MovieTypography
 import com.example.presentation.ui.components.ErrorView
+import com.example.presentation.ui.components.GenreChip
+import com.example.presentation.ui.components.MetadataText
+import com.example.presentation.ui.components.MoviePoster
+import com.example.presentation.ui.components.PrimaryMovieButton
+import com.example.presentation.ui.components.RatingBadge
+import androidx.compose.ui.graphics.lerp as lerpColor
 
 /**
  * Created by Ahmad Pahmi on May 2026
  */
-
-private val COLLAPSED_TOOLBAR_HEIGHT = 64.dp
-private val EXPANDED_TOOLBAR_HEIGHT = 300.dp
 
 @Composable
 fun MovieDetailRoute(
@@ -90,36 +93,33 @@ fun MovieDetailScreen(
     onToggleWishlist: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MovieColors.PrimaryBackground)
+    ) {
         when (uiState) {
             is MovieDetailUiState.Loading -> CircularProgressIndicator(
-                modifier = Modifier.align(
-                    Alignment.Center
-                )
+                modifier = Modifier.align(Alignment.Center),
+                color = MovieColors.MovieAccent
             )
 
             is MovieDetailUiState.Success -> CollapsingMovieDetail(
-                movie = uiState.movie, isWishlisted = isWishlisted,
-                onBackPressed = onBackPressed, onToggleWishlist = onToggleWishlist
+                movie = uiState.movie,
+                isWishlisted = isWishlisted,
+                onBackPressed = onBackPressed,
+                onToggleWishlist = onToggleWishlist
             )
 
             is MovieDetailUiState.Error -> ErrorView(
-                title = uiState.message, description = uiState.message, onRetry = onRetry
+                title = "Unable to load movie",
+                description = uiState.message,
+                onRetry = onRetry
             )
         }
     }
 }
 
-/**
- * Collapsing toolbar implementation using scroll-based interpolation.
- *
- * Architectural Decision: We use a plain ScrollState + derivedStateOf instead of
- * TopAppBarScrollBehavior. This gives us pixel-perfect control over the collapse
- * animation without coupling to Material3's internal scroll logic.
- *
- * derivedStateOf is critical here: it memoizes derived values so they only
- * recompute when scrollState value actually changes, not on every recomposition.
- */
 @Composable
 private fun CollapsingMovieDetail(
     movie: Movie,
@@ -129,101 +129,152 @@ private fun CollapsingMovieDetail(
 ) {
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
-
-    val expandedHeightPx = with(density) { EXPANDED_TOOLBAR_HEIGHT.toPx() }
-    val collapseHeightPx = with(density) { COLLAPSED_TOOLBAR_HEIGHT.toPx() }
-
-    // derivedStateOf: Only recomputes when scrollState.value changes.
-    // Without this, every recomposition would recalculate — wasteful.
+    val expandedHeightPx = with(density) { AppMovieSize.DetailToolbarExpanded.toPx() }
+    val collapseHeightPx = with(density) { AppMovieSize.DetailToolbarCollapsed.toPx() }
     val collapseProgress by remember {
         derivedStateOf {
             (scrollState.value / (expandedHeightPx - collapseHeightPx)).coerceIn(0f, 1f)
         }
     }
-
-    val toolbarAlpha by animateFloatAsState(
+    val backdropAlpha by animateFloatAsState(
         targetValue = 1f - collapseProgress,
-        label = "toolbar_alpha"
+        animationSpec = AppAnimation.normalTween(),
+        label = "detail_backdrop_alpha"
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Scrollable content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
+                .navigationBarsPadding()
         ) {
-            Spacer(modifier = Modifier.height(EXPANDED_TOOLBAR_HEIGHT))
-
-            // Content
-            Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = movie.title,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    RatingRow(movie)
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (movie.genreIds.isNotEmpty()) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        movie.genreIds.forEach { genre ->
-                            AssistChip(
-                                onClick = {},
-                                label = { Text("$genre") },
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(16.dp))
-                }
-
-                Text(
-                    "Overview",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = movie.overview,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                )
-                Spacer(Modifier.height(80.dp))
-            }
+            Spacer(modifier = Modifier.height(AppMovieSize.DetailToolbarExpanded))
+            MovieDetailBody(
+                movie = movie,
+                isWishlisted = isWishlisted,
+                onToggleWishlist = onToggleWishlist
+            )
         }
 
-        // Fixed header that collapses
         CollapsingHeader(
             movie = movie,
             collapseProgress = collapseProgress,
-            backdropAlpha = toolbarAlpha,
+            backdropAlpha = backdropAlpha,
             onBackPressed = onBackPressed
         )
+    }
+}
 
-        // Wishlist FAB
-        FloatingActionButton(
-            onClick = onToggleWishlist,
-            containerColor = if (isWishlisted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .navigationBarsPadding()
+@Composable
+private fun MovieDetailBody(
+    movie: Movie,
+    isWishlisted: Boolean,
+    onToggleWishlist: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MovieColors.PrimaryBackground)
+            .padding(AppSpacing.L)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.L),
+            verticalAlignment = Alignment.Top
         ) {
-            Icon(
-                imageVector = if (isWishlisted) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                contentDescription = "",
-                tint = if (isWishlisted) Color.White else MaterialTheme.colorScheme.onSurface
+            MoviePoster(
+                imageUrl = movie.posterPath,
+                title = movie.title,
+                modifier = Modifier.width(AppMovieSize.DetailPosterWidth)
             )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = movie.title,
+                    style = MovieTypography.MovieTitle,
+                    color = MovieColors.TextPrimary,
+                    modifier = Modifier.semantics { heading() }
+                )
+                Spacer(modifier = Modifier.height(AppSpacing.M))
+                DetailMetadata(movie = movie)
+                Spacer(modifier = Modifier.height(AppSpacing.L))
+                PrimaryMovieButton(
+                    text = if (isWishlisted) "Saved" else "Add to list",
+                    onClick = onToggleWishlist,
+                    icon = if (isWishlisted) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        if (movie.genreIds.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(AppSpacing.XL))
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.S),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.S)
+            ) {
+                movie.genreIds.forEach { genreId ->
+                    GenreChip(genre = "Genre $genreId")
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(AppSpacing.XL))
+        Text(
+            text = "Overview",
+            style = MovieTypography.SectionTitle,
+            color = MovieColors.TextPrimary,
+            modifier = Modifier.semantics { heading() }
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.S))
+        Text(
+            text = movie.overview.ifBlank { "No overview available yet." },
+            style = MovieTypography.Body,
+            color = MovieColors.TextSecondary
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.XXXL))
+    }
+}
+
+@Composable
+private fun DetailMetadata(movie: Movie) {
+    Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.S)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.S)
+        ) {
+            RatingBadge(rating = movie.voteAverage)
+            MetadataText(text = movie.releaseYear())
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.S)
+        ) {
+            MetadataIcon(
+                icon = Icons.Filled.Language,
+                contentDescription = "Original language"
+            )
+            MetadataText(text = movie.originalLanguage.uppercase())
+            MetadataIcon(
+                icon = Icons.Filled.Star,
+                contentDescription = "Vote count"
+            )
+            MetadataText(text = "${movie.voteCount} votes")
         }
     }
+}
+
+@Composable
+private fun MetadataIcon(
+    icon: ImageVector,
+    contentDescription: String
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = contentDescription,
+        tint = MovieColors.TextTertiary,
+        modifier = Modifier.size(AppIconSize.S)
+    )
 }
 
 @Composable
@@ -234,267 +285,108 @@ private fun CollapsingHeader(
     onBackPressed: () -> Unit
 ) {
     val toolbarHeight = lerp(
-        start = EXPANDED_TOOLBAR_HEIGHT,
-        stop = COLLAPSED_TOOLBAR_HEIGHT,
+        start = AppMovieSize.DetailToolbarExpanded,
+        stop = AppMovieSize.DetailToolbarCollapsed,
         fraction = collapseProgress
+    )
+    val titleAlpha by animateFloatAsState(
+        targetValue = collapseProgress,
+        animationSpec = AppAnimation.fastTween(),
+        label = "detail_title_alpha"
     )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(toolbarHeight)
+            .background(MovieColors.PrimaryBackground)
     ) {
-        // Backdrop image fades out as toolbar collapses
         AsyncImage(
-            model = movie.posterPath,
-            contentDescription = null,
+            model = movie.backdropPath.ifBlank { movie.posterPath },
+            contentDescription = "${movie.title} backdrop",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
                 .alpha(backdropAlpha)
         )
-
-        // Gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .alpha(backdropAlpha)
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color.Black.copy(0.4f), Color.Black.copy(0.7f))
+                        colors = listOf(
+                            MovieColors.Scrim.copy(alpha = 0.12f),
+                            MovieColors.PrimaryBackground.copy(alpha = 0.45f),
+                            MovieColors.PrimaryBackground
+                        )
                     )
                 )
-                .alpha(backdropAlpha)
         )
-
-        // Navigation row (always visible)
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 8.dp)
-        ) {
-            IconButton(onClick = onBackPressed) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = lerp(Color.White, MaterialTheme.colorScheme.onSurface, collapseProgress)
-                )
-            }
-
-            // Title fades In when collapsed
-            Text(
-                text = movie.title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .alpha(collapseProgress),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+                .height(AppMovieSize.DetailToolbarCollapsed)
+                .align(Alignment.TopCenter)
+                .alpha(collapseProgress)
+                .background(MovieColors.PrimaryBackground.copy(alpha = 0.92f))
+        )
+        DetailTopBar(
+            title = movie.title,
+            titleAlpha = titleAlpha,
+            collapseProgress = collapseProgress,
+            onBackPressed = onBackPressed
+        )
     }
 }
 
 @Composable
-private fun RatingRow(movie: Movie) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Filled.Favorite, null, tint = GoldRating, modifier = Modifier.size(16.dp))
-        Text(" ${movie.voteAverage} - ${movie.releaseDate} - ${movie.originalLanguage}")
+private fun DetailTopBar(
+    title: String,
+    titleAlpha: Float,
+    collapseProgress: Float,
+    onBackPressed: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = AppSpacing.S),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(
+            onClick = onBackPressed,
+            modifier = Modifier.semantics { contentDescription = "Navigate back" }
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                tint = lerpColor(Color.White, MovieColors.TextPrimary, collapseProgress)
+            )
+        }
+        Text(
+            text = title,
+            style = MovieTypography.MovieSubtitle,
+            color = MovieColors.TextPrimary,
+            modifier = Modifier
+                .padding(start = AppSpacing.S)
+                .alpha(titleAlpha)
+                .weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
-// Lerp helper for Dp values
+private fun Movie.releaseYear(): String {
+    return releaseDate.takeIf { it.length >= 4 }?.take(4) ?: "TBA"
+}
+
 private fun lerp(
     start: androidx.compose.ui.unit.Dp,
     stop: androidx.compose.ui.unit.Dp,
     fraction: Float
-): androidx.compose.ui.unit.Dp {
-    return start + (stop - start) * fraction
-}
-
-/*@Composable
-@Preview(showBackground = true)
-private fun CollapsingMovieDetailPreview() {
-    CollapsingMovieDetail(
-        movie = Movie(
-            id = "1",
-            title = "The Shawshank Redemption",
-            description = "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-            posterUrl = "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-            releaseDate = "",
-            runtime = "",
-            rating = "",
-            language = listOf(""),
-            genres = listOf("")
-        ),
-        isWishlisted = true,
-        onBackPressed = {},
-        onToggleWishlist = {}
-    )
-}*/
-
-@Composable
-private fun MovieDetailContent(
-    movie: Movie, onBackPressed: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        // Hero Backdrop
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .aspectRatio(16f / 9f)
-        ) {
-            AsyncImage(
-                model = movie.posterPath,
-                contentDescription = movie.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Black.copy(0.3f), Color.Black.copy(0.7f))
-                        )
-                    )
-            )
-
-            IconButton(
-                onClick = onBackPressed,
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(8.dp)
-                    .align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White
-                )
-            }
-        }
-
-        // Content
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = movie.title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RatingBadge(movie.voteAverage, 100)
-                MetaItem(Icons.Filled.AccessTime, "Time")
-                MetaItem(Icons.Filled.Language, "Engleehs")
-                Text(
-                    text = movie.releaseDate,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            //Genres
-            if (movie.genreIds.isNotEmpty()) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    movie.genreIds.forEach { genre ->
-                        GenreChip("$genre")
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Overview
-            Text(
-                text = "Overview",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = movie.overview,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
-            )
-        }
-    }
-}
-
-@Composable
-private fun RatingBadge(rating: Double, voteCount: Int) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = Icons.Filled.Star,
-            contentDescription = "Rating",
-            tint = GoldRating,
-            modifier = Modifier.size(16.dp)
-        )
-        Text(
-            text = " $rating",
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = GoldRating
-        )
-        Text(
-            text = " ($voteCount)",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RatingBadgePreview() {
-    RatingBadge(rating = 9.3, voteCount = 1484)
-}
-
-@Composable()
-private fun MetaItem(
-    icon: ImageVector,
-    text: String
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-        Text(
-            text = " $text",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun MetaItemPreview() {
-    MetaItem(icon = Icons.Filled.Star, text = "9.3")
-}
-
-@Composable
-private fun GenreChip(genre: String) {
-    AssistChip(
-        onClick = {},
-        label = { Text(genre, style = MaterialTheme.typography.labelSmall) },
-        shape = MaterialTheme.shapes.small
-    )
-}
+): androidx.compose.ui.unit.Dp = start + (stop - start) * fraction
 
 @Preview(showBackground = true)
 @Composable
@@ -504,7 +396,7 @@ fun MovieDetailScreenPreview() {
             movie = Movie(
                 id = 1,
                 title = "Inception",
-                overview = "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                overview = "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.",
                 posterPath = "https://image.tmdb.org/t/p/w500/edv5CZv0jH9NXN2FU6N2gaDNBzH.jpg",
                 backdropPath = "https://image.tmdb.org/t/p/w500/8ZTPjS7SBy96z99v9uURM9P9S9P.jpg",
                 releaseDate = "2010-07-15",
@@ -515,7 +407,7 @@ fun MovieDetailScreenPreview() {
                 isAdult = false,
                 includeVideo = false,
                 popularity = 8.0,
-                originalTitle = ""
+                originalTitle = "Inception"
             )
         ),
         onBackPressed = {},

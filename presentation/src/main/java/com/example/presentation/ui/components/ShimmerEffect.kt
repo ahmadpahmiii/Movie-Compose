@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,6 +24,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.presentation.designsystem.AppAnimation
+import com.example.presentation.designsystem.AppShape
+import com.example.presentation.designsystem.AppSpacing
+import com.example.presentation.designsystem.MovieColors
 
 /**
  * Created by Ahmad Pahmi on May 2026
@@ -38,9 +41,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun shimmerBrush(showShimmer: Boolean = true): Brush {
     val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f)
+        MovieColors.SurfaceVariant.copy(alpha = 0.95f),
+        Color.White.copy(alpha = 0.08f),
+        MovieColors.SurfaceVariant.copy(alpha = 0.95f)
     )
 
     return if (showShimmer) {
@@ -49,7 +52,7 @@ fun shimmerBrush(showShimmer: Boolean = true): Brush {
             initialValue = 0f,
             targetValue = 1000f,
             animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 1000),
+                animation = tween(durationMillis = AppAnimation.Slow * 2),
                 repeatMode = RepeatMode.Restart
             ),
             label = "shimmer_translate"
@@ -66,28 +69,28 @@ fun shimmerBrush(showShimmer: Boolean = true): Brush {
 @Composable
 fun MovieCardShimmer(modifier: Modifier = Modifier) {
     val brush = shimmerBrush()
-    Column(modifier = modifier.width(150.dp)) {
+    Column(modifier = modifier.width(156.dp)) {
         Box(
             modifier = Modifier
-                .width(150.dp)
+                .width(156.dp)
                 .aspectRatio(2f / 3f)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(AppShape.Large)
                 .background(brush)
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.S))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(16.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .height(AppSpacing.L)
+                .clip(AppShape.Small)
                 .background(brush)
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.XS))
         Box(
             modifier = Modifier
                 .width(80.dp)
-                .height(12.dp)
-                .clip(RoundedCornerShape(4.dp))
+                .height(AppSpacing.M)
+                .clip(AppShape.Small)
                 .background(brush)
         )
     }
@@ -96,9 +99,9 @@ fun MovieCardShimmer(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun MovieListShimmer(modifier: Modifier = Modifier) {
-    LazyRow(modifier = modifier.padding(horizontal = 16.dp)) {
+    LazyRow(modifier = modifier.padding(horizontal = AppSpacing.L)) {
         items(6) {
-            MovieCardShimmer(modifier = Modifier.padding(end = 12.dp))
+            MovieCardShimmer(modifier = Modifier.padding(end = AppSpacing.M))
         }
     }
 }
